@@ -137,4 +137,20 @@ class Test extends FunSuite {
             """.stripMargin.trim
         ) == "<p>Hello, <b>eri~~*down*~~ up</b></p>")
     }
+
+    test("Html 1") {
+        assert(Parser.render(
+            """
+              |<b>Hello, <em>eridown</em></b>
+            """.stripMargin.trim
+        ) == "<p><b>Hello, <em>eridown</em></b></p>")
+    }
+
+    test("Html 2") {
+        assert(Parser.render(
+            """
+              |<script>alert(0);</script>
+            """.stripMargin.trim
+        ) == "<p>&lt;script&gt;alert(0);&lt;/script&gt;</p>")
+    }
 }

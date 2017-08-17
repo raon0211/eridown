@@ -1,5 +1,5 @@
 package in.suhj.eridown
 
-trait Element {
+abstract class Element {
     def render: String
 }

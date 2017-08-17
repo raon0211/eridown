@@ -105,6 +105,7 @@ abstract class MarkdownGenerator extends Generator {
         CodeInlineGenerator,
         LinkGenerator,
         ImageGenerator,
+        DefaultHtmlTagGenerator,
         NoFormatInlineGenerator
     )
 

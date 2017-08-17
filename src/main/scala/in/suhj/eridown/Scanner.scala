@@ -44,6 +44,18 @@ class Scanner private (
     def extract =
         if (marker <= position) buffer.substring(marker, position)
         else buffer.substring(position, marker)
+    def extractIdentifier = {
+        def atValidStart = Character.isLetter(currentChar) || reads('_')
+        def atValidLetter = atValidStart || Character.isDigit(currentChar)
+
+        mark()
+        if (atValidStart) {
+            skip(1)
+            while (position < end && atValidLetter) skip(1)
+        }
+
+        extract
+    }
 
     def skip(offset: Int) = position += offset
     def skipWhitespace() = {
