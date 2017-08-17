@@ -94,7 +94,8 @@ abstract class MarkdownGenerator extends Generator {
         CodeGenerator,
         ListGenerator,
         TableGenerator,
-        DefinitionListGenerator
+        DefinitionListGenerator,
+        NoFormatGenerator
     )
     protected def inlines: List[MarkdownGenerator] = List(
         BoldGenerator,

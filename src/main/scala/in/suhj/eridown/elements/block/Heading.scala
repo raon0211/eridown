@@ -8,9 +8,6 @@ case class Heading(level: Int, text: String) extends Element {
 }
 
 object HeadingGenerator extends BlockGenerator {
-    override def generators = inlines
-    override def fillGenerator = TextGenerator
-
     def generate(content: String): ParseResult = {
         val scanner = Scanner(content)
 

@@ -7,9 +7,6 @@ case class Code(language: String, text: String) extends Element {
 }
 
 object CodeGenerator extends BlockGenerator {
-    override val isBlock = true
-    override def generators = Nil
-
     def generate(content: String): ParseResult = {
         val scanner = Scanner(content)
 

@@ -18,8 +18,6 @@ case class ListItem(text: String, indent: Int, ordered: Boolean) extends Element
 }
 
 object ListGenerator extends BlockGenerator {
-    override def generators = List(ListItemGenerator)
-
     def generate(content: String): ParseResult = {
         val items = getChildrenData(ListItemGenerator, content)
         if (items.isEmpty) return Invalid()
@@ -73,9 +71,6 @@ object ListGenerator extends BlockGenerator {
 }
 
 object ListItemGenerator extends BlockGenerator {
-    override def generators = inlines
-    override def fillGenerator = TextGenerator
-
     def generate(text: String): ParseResult = {
         val scanner = Scanner(text)
         var indent = 0

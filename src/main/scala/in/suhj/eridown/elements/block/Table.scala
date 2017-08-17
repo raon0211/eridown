@@ -43,8 +43,6 @@ case class TableData(text: String, alignment: TableDataAlignment, isHeader: Bool
 }
 
 object TableGenerator extends BlockGenerator {
-    override def generators = List(TableRowGenerator)
-
     def generate(text: String): ParseResult = {
         val result = getChildrenData(TableRowGenerator, text)
         if (result.isEmpty) return Invalid()
@@ -100,8 +98,6 @@ object TableGenerator extends BlockGenerator {
 }
 
 object TableRowGenerator extends BlockGenerator {
-    override def generators = List(TableDataGenerator)
-
     def generate(text: String): ParseResult = {
         val result = getChildrenData(TableDataGenerator, text).map(_.element.asInstanceOf[TableData])
         if (result.isEmpty) return Invalid()
@@ -111,9 +107,6 @@ object TableRowGenerator extends BlockGenerator {
 }
 
 object TableDataGenerator extends BlockGenerator {
-    override def generators = inlines
-    override def fillGenerator = TextGenerator
-
     def generate(text: String): ParseResult = {
         import TableDataAlignment._
 

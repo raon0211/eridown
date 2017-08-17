@@ -34,9 +34,6 @@ object DefinitionListGenerator extends BlockGenerator {
 }
 
 object DefinitionItemGenerator extends BlockGenerator {
-    override def generators = inlines
-    override def fillGenerator = TextGenerator
-
     def generate(content: String): ParseResult = {
         val scanner = Scanner(content)
 

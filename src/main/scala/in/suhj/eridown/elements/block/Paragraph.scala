@@ -8,9 +8,6 @@ case class Paragraph(text: Seq[String]) extends Element {
 }
 
 object ParagraphGenerator extends BlockGenerator {
-    override def generators = inlines
-    override def fillGenerator = TextGenerator
-
     def generate(text: String) = {
         Valid(Paragraph(text.split("\n\n").map(transform)), text.length)
     }

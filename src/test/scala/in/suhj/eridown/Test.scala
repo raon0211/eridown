@@ -52,6 +52,18 @@ class Test extends FunSuite {
         ) == "<dl><dt>Term </dt><dd>Definition</dd><dt>Term</dt><dd>Definition</dd></dl>")
     }
 
+    test("No Format 1") {
+        assert(Parser.render(
+            """
+              |%%
+              |* We do nothing
+              |
+              |^ To the | markup. |
+              |%%
+            """.stripMargin.trim
+        ) == "\n* We do nothing\n\n^ To the | markup. |\n")
+    }
+
     test("Paragraph 1") {
         assert(Parser.render(
             """
