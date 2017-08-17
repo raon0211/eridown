@@ -55,11 +55,11 @@ class Test extends FunSuite {
     test("No Format 1") {
         assert(Parser.render(
             """
-              |%%
+              |%%%
               |* We do nothing
               |
               |^ To the | markup. |
-              |%%
+              |%%%
             """.stripMargin.trim
         ) == "\n* We do nothing\n\n^ To the | markup. |\n")
     }
@@ -88,5 +88,53 @@ class Test extends FunSuite {
               |Hello, **eridown**
             """.stripMargin.trim
         ) == "<p>Hello, <b>eridown</b></p>")
+    }
+
+    test("Bold 2") {
+        assert(Parser.render(
+            """
+              |Hello, ***eri*down**
+            """.stripMargin.trim
+        ) == "<p>Hello, <b><em>eri</em>down</b></p>")
+    }
+
+    test("Emphasis 1") {
+        assert(Parser.render(
+            """
+              |Hello, *eridown*
+            """.stripMargin.trim
+        ) == "<p>Hello, <em>eridown</em></p>")
+    }
+
+    test("Link 1") {
+        assert(Parser.render(
+            """
+              |[**Eri**down](link)
+            """.stripMargin.trim
+        ) == """<p><a href="link"><b>Eri</b>down</a></p>""")
+    }
+
+    test("Strike 1") {
+        assert(Parser.render(
+            """
+              |Hello, **eri~~*down*~~ up**
+            """.stripMargin.trim
+        ) == "<p>Hello, <b>eri<del><em>down</em></del> up</b></p>")
+    }
+
+    test("Image 1") {
+        assert(Parser.render(
+            """
+              |![**Eri**down](link)
+            """.stripMargin.trim
+        ) == """<p><img src="link" alt="**Eri**down"></p>""")
+    }
+
+    test("No Format Inline 1") {
+        assert(Parser.render(
+            """
+              |Hello, **%%eri~~*down*~~%% up**
+            """.stripMargin.trim
+        ) == "<p>Hello, <b>eri~~*down*~~ up</b></p>")
     }
 }

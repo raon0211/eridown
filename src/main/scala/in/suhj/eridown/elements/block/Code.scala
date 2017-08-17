@@ -24,7 +24,7 @@ object CodeGenerator extends BlockGenerator {
             return Invalid()
         val text = scanner.extract
 
-        scanner.skip(4)
+        scanner.skip(3)
         Valid(Code(lang, text), scanner.position)
     }
 }

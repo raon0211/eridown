@@ -3,24 +3,21 @@ package in.suhj.eridown.elements.inline
 import in.suhj.eridown._
 
 case class Emphasis(text: String) extends Element {
-    def render = s"<b>$text</b>"
+    def render = s"<em>$text</em>"
 }
 
 object EmphasisGenerator extends InlineGenerator {
-    override def generators = inlines
-    override def fillGenerator = TextGenerator
-
     def generate(text: String): ParseResult = {
         val scanner = Scanner(text)
 
         if (!scanner.reads('*')) return Invalid()
-        scanner.skip(2)
+        scanner.skip(1)
 
         scanner.mark()
         if (!scanner.find('*')) return Invalid()
         val content = scanner.extract
 
         if (content.isEmpty) Invalid()
-        else Valid(Emphasis(content), scanner.position + 1)
+        else Valid(Emphasis(transform(content)), scanner.position + 1)
     }
 }

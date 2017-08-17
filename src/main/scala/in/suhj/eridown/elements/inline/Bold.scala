@@ -7,9 +7,6 @@ case class Bold(text: String) extends Element {
 }
 
 object BoldGenerator extends InlineGenerator {
-    override def generators = inlines
-    override def fillGenerator = TextGenerator
-
     def generate(text: String): ParseResult = {
         val scanner = Scanner(text)
 
@@ -21,6 +18,6 @@ object BoldGenerator extends InlineGenerator {
         val content = scanner.extract
 
         if (content.isEmpty) Invalid()
-        else Valid(Bold(content), scanner.position + 2)
+        else Valid(Bold(transform(content)), scanner.position + 2)
     }
 }

@@ -1,7 +1,7 @@
 package in.suhj.eridown
 
 import in.suhj.eridown.elements.block._
-import in.suhj.eridown.elements.inline.{BoldGenerator, EmphasisGenerator, TextGenerator}
+import in.suhj.eridown.elements.inline._
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -64,6 +64,7 @@ abstract class Generator {
         if (elements.isEmpty) return fillRender(text)
 
         var renders = new ListBuffer[String]
+        elements += ElementRange(Text(""), Range(text.length, text.length)) // For the sake of the last plain text to be processed
 
         for {
             i <- elements.indices
@@ -99,14 +100,16 @@ abstract class MarkdownGenerator extends Generator {
     )
     protected def inlines: List[MarkdownGenerator] = List(
         BoldGenerator,
-        EmphasisGenerator
+        EmphasisGenerator,
+        StrikeGenerator,
+        CodeInlineGenerator,
+        LinkGenerator,
+        ImageGenerator,
+        NoFormatInlineGenerator
     )
 
     val isBlock: Boolean
-    override def generators = if (isBlock) inlines else blocks
-    override def fillGenerator = if (isBlock) TextGenerator else ParagraphGenerator
-    override def skipToNext(scanner: Scanner) = {
-        if (isBlock) scanner.skip(1)
-        else scanner.skipToNextLine()
-    }
+    override def generators: List[Generator] = inlines
+    override def fillGenerator: Generator = TextGenerator
+    override def skipToNext(scanner: Scanner) = scanner.skip(1)
 }

@@ -11,12 +11,12 @@ object NoFormatGenerator extends BlockGenerator {
     def generate(content: String): ParseResult = {
         val scanner = Scanner(content)
 
-        if (!scanner.reads("%%")) return Invalid()
-        scanner.skip(2)
+        if (!scanner.reads("%%%")) return Invalid()
+        scanner.skip(3)
         scanner.mark()
 
-        if (!scanner.find("%%")) return Invalid()
+        if (!scanner.find("%%%")) return Invalid()
 
-        Valid(NoFormat(scanner.extract), scanner.position + 2)
+        Valid(NoFormat(scanner.extract), scanner.position + 3)
     }
 }

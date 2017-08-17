@@ -1,7 +1,7 @@
 Eridown
 =========
 
-Eridown is a project that aims for a *scalable*, *fast*, and *accurate* Markdown parser written in the powerful Scala language. Also, it provides an extension of Markdown, named *Eridown*, which has many convenient syntaxes such as tables, and definition lists.
+Eridown is a project that aims for a *scalable*, *fast*, and *accurate* Markdown parser written in the powerful Scala language. Also, it provides an extension of Markdown, named *Eridown*, which has many convenient syntaxes such as tables, definition lists, and no-format.
 
 # Features
 
