@@ -3,7 +3,7 @@ package in.suhj.eridown
 import scala.collection.mutable.ListBuffer
 import xml.Utility.escape
 
-abstract class Element {
+trait Element {
     def render: String
 }
 
@@ -28,11 +28,50 @@ case class Paragraph(text: String) extends Element {
 }
 
 case class ListElement(val children: ListBuffer[Element]) extends Element {
-    def render = s"<ul>${children.map(_.render).mkString}</ul>"
+    def render = {
+        val element = if (children(0).asInstanceOf[ListItem].ordered) "ol" else "ul"
+        s"<ul>${children.map(_.render).mkString}</ul>"
+    }
 }
 
 case class ListItem(text: String, indent: Int, ordered: Boolean) extends Element {
     def render = s"<li>$text</li>"
+}
+
+case class Table(text: String) extends Element {
+    def render = s"<table>$text</table>"
+}
+
+case class TableRow(val children: ListBuffer[TableData]) extends Element {
+    def render = s"<tr>${children.map(_.render).mkString}</tr>"
+}
+
+object TableDataAlignment extends Enumeration {
+    type TableDataAlignment = Value
+    val Left, Right, Center = Value
+}
+import TableDataAlignment._
+
+case class TableData(text: String, alignment: TableDataAlignment, isHeader: Boolean) extends Element {
+    var rowspan = 1
+    var colspan = 1
+
+    def render = {
+        val element = if (isHeader) "th" else "td"
+        def attributes = {
+            var span = ""
+
+            if (rowspan > 1) span += s""" rowspan="$rowspan""""
+            if (colspan > 1) span += s""" colspan="$colspan""""
+
+            if (alignment == Center) span += s""" class="center""""
+            else if (alignment == Right) span += s""" class="right""""
+
+            span
+        }
+
+        s"""<$element$attributes>$text</$element>"""
+    }
 }
 
 case class Text(text: String) extends Element {

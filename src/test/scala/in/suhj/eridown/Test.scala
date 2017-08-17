@@ -32,4 +32,13 @@ class Test extends FunSuite {
             """.stripMargin.trim
         ) === "<ul><li>Eriri</li><ul><li>is</li><ul><li>so</li></ul><li>cute</li></ul><li>and</li><li>lovely</li></ul>")
     }
+
+    test("Table 1") {
+        assert(Parser.render(
+            """
+              |^ Left  |  Center  ||
+              |^ ::: |   Right | Left |
+            """.stripMargin
+        ) === "<table><tr><th rowspan=\"2\">Left</th><td colspan=\"2\" class=\"center\">Center</td></tr><tr><td class=\"right\">Right</td><td>Left</td></tr></table>")
+    }
 }

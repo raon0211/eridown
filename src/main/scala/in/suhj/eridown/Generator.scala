@@ -19,6 +19,7 @@ abstract class Generator {
         BlockquoteGenerator,
         CodeGenerator,
         ListGenerator,
+        TableGenerator
     )
     protected final def inlines: List[Generator] = Nil
 
@@ -27,6 +28,18 @@ abstract class Generator {
 
     protected def generate(text: String): ParseResult
 
+    protected final def getChildrenData(generator: Generator, text: String): List[Valid] = {
+        @tailrec
+        def readChild(items: List[Valid], text: String): List[Valid] = {
+            generator.generate(text) match {
+                case Invalid() => items.reverse
+                case valid @ Valid(_, length) => {
+                    readChild(valid :: items, text.substring(length))
+                }
+            }
+        }
+        readChild(Nil, text)
+    }
     protected final def transform(text: String): String = {
         def fillRender(text: String) = fillGenerator.generate(text).asInstanceOf[Valid].element.render
 
@@ -165,17 +178,7 @@ object ListGenerator extends Generator {
     override def generators = List(ListItemGenerator)
 
     def generate(content: String): ParseResult = {
-        @tailrec
-        def readItems(items: List[Valid], text: String): List[Valid] = {
-            ListItemGenerator.generate(text) match {
-                case Invalid() => items.reverse
-                case valid @ Valid(_, length) => {
-                    readItems(valid :: items, text.substring(length))
-                }
-            }
-        }
-
-        val items = readItems(Nil, content)
+        val items = getChildrenData(ListItemGenerator, content)
 
         if (items.isEmpty) return Invalid()
 
@@ -283,6 +286,116 @@ object ListItemGenerator extends Generator {
             if (scanner.currentChar == '\n' || scanner.currentChar == '\r') 1
             else 0
         Valid(ListItem(transform(scanner.extract), indent, ordered), scanner.position + skipNewline)
+    }
+}
+
+object TableGenerator extends Generator {
+    override def generators = List(TableRowGenerator)
+
+    def generate(text: String): ParseResult = {
+        val result = getChildrenData(TableRowGenerator, text)
+        if (result.isEmpty) return Invalid()
+
+        val rows = new ListBuffer[TableRow]
+        var totalOffset = 0
+
+        for (res <- result) {
+            rows += res.element.asInstanceOf[TableRow]
+            totalOffset += res.rawLength
+        }
+
+        def setSpans(rows: ListBuffer[TableRow]): List[TableRow] = {
+            @tailrec
+            def countColspan(colspan: Int, row: TableRow, column: Int): Int = {
+                if (column == row.children.length - 1) return colspan
+
+                if (!row.children(column + 1).text.trim.isEmpty) colspan
+                else countColspan(colspan + 1, row, column + 1)
+            }
+
+            @tailrec
+            def countRowspan(rowspan: Int, rows: ListBuffer[TableRow], row: Int, column: Int): Int = {
+                if (row == rows.length - 1) return rowspan
+
+                if (rows(row + 1).children(column).text.trim != ":::") rowspan
+                else countRowspan(rowspan + 1, rows, row + 1, column)
+            }
+
+            for (i <- rows.indices) {
+                val row = rows(i)
+
+                val newColumns = new ListBuffer[TableData]
+                for (j <- row.children.indices) {
+                    val column = row.children(j)
+                    val text = column.text.trim
+
+                    if (text != ":::" && !text.isEmpty) {
+                        column.colspan = countColspan(1, row, j)
+                        column.rowspan = countRowspan(1, rows, i, j)
+                        newColumns += column
+                    }
+                }
+
+                rows(i) = TableRow(newColumns)
+            }
+
+            rows.toList
+        }
+
+        Valid(Table(setSpans(rows).map(_.render).mkString), totalOffset)
+    }
+}
+
+object TableRowGenerator extends Generator {
+    override def generators = List(TableDataGenerator)
+
+    def generate(text: String): ParseResult = {
+        val result = getChildrenData(TableDataGenerator, text).map(_.element.asInstanceOf[TableData])
+        if (result.isEmpty) return Invalid()
+
+        Valid(TableRow(new ListBuffer[TableData] ++= result), text.indexOf('\n') + 1)
+    }
+}
+
+object TableDataGenerator extends Generator {
+    override def generators = inlines
+    override def fillGenerator = TextGenerator
+
+    def generate(text: String): ParseResult = {
+        import TableDataAlignment._
+
+        val scanner = Scanner(text)
+
+        val delim = scanner.currentChar
+        if (delim != '|' && delim != '^')
+            return Invalid()
+        scanner.skip(1)
+
+        var leadingSpaces = 0
+        while (scanner.atWhitespace) {
+            scanner.skip(1)
+            leadingSpaces += 1
+        }
+        scanner.mark()
+
+        val seek = scanner.seekAny(List('|', '^'))
+        if (seek < 0) return Invalid()
+        else if (scanner.seek('\n') < seek) return Invalid()
+        scanner.skip(seek - 1)
+
+        var trailingSpaces = 0
+        while (scanner.atWhitespace) {
+            scanner.skip(-1)
+            trailingSpaces += 1
+        }
+        scanner.skip(1)
+
+        val alignment =
+            if (Math.min(leadingSpaces, trailingSpaces) >= 2) Center
+            else if (leadingSpaces >= 2) Right
+            else Left
+
+        Valid(TableData(scanner.extract, alignment, delim == '^'), scanner.position + trailingSpaces)
     }
 }
 

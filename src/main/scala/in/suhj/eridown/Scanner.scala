@@ -1,6 +1,6 @@
 package in.suhj.eridown
 
-private[in] class Scanner private (
+class Scanner private (
     val buffer: String,
     var position: Int = 0,
     var start: Int,
@@ -29,6 +29,7 @@ private[in] class Scanner private (
     def atStart = position == start
     def atEnd = position >= end
     def atLineEnd = isLineEnd(currentChar)
+    def atWhitespace = isWhitespace(currentChar)
 
     def reads(char: Char) = char == currentChar
     def reads(str: String) = {
@@ -40,7 +41,9 @@ private[in] class Scanner private (
     def readsAny(chars: Seq[Char]) = chars.exists(reads _)
 
     def mark() = marker = position
-    def extract = buffer.substring(marker, position)
+    def extract =
+        if (marker <= position) buffer.substring(marker, position)
+        else buffer.substring(position, marker)
 
     def skip(offset: Int) = position += offset
     def skipWhitespace() = {
@@ -63,6 +66,18 @@ private[in] class Scanner private (
         skipLineEnd()
     }
 
+    def seek(char: Char): Int = seek(String.valueOf(char))
+    def seek(str: String): Int =  {
+        val index = buffer.indexOf(str, position)
+        if (index >= 0) index - position
+        else -1
+    }
+    def seekAny(chars: Seq[Char]): Int = {
+        val indexes = chars.map(seek).filter(_ >= 0)
+        if (indexes.isEmpty) -1
+        else indexes.min
+    }
+
     def find(char: Char): Boolean = find(String.valueOf(char))
     def find(str: String): Boolean = {
         val index = buffer.indexOf(str, position)
@@ -76,7 +91,7 @@ private[in] class Scanner private (
     }
 }
 
-private[in] object Scanner {
+object Scanner {
     def apply(buffer: String) = new Scanner(buffer, 0)
     def apply(buffer: String, start: Int) = new Scanner(buffer, start)
     def apply(buffer: String, start: Int, end: Int) = new Scanner(buffer, start, start, end)
