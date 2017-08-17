@@ -8,9 +8,7 @@ abstract class ParseResult
 case class Valid(element: Element, rawLength: Int) extends ParseResult
 case class Invalid() extends ParseResult
 
-case class Range(start: Int, end: Int) {
-    def isEmpty = start == end
-}
+case class Range(start: Int, end: Int)
 case class ElementRange(element: Element, range: Range)
 
 abstract class Generator {
@@ -19,7 +17,8 @@ abstract class Generator {
         BlockquoteGenerator,
         CodeGenerator,
         ListGenerator,
-        TableGenerator
+        TableGenerator,
+        DefinitionListGenerator
     )
     protected final def inlines: List[Generator] = Nil
 

@@ -21,7 +21,6 @@ object ListGenerator extends Generator {
 
     def generate(content: String): ParseResult = {
         val items = getChildrenData(ListItemGenerator, content)
-
         if (items.isEmpty) return Invalid()
 
         def createListHierarchy(items: List[Valid]): (Element, Int) = {

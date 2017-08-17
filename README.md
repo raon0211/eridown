@@ -15,6 +15,6 @@ However Eridown changes this paradigm. By only writing a markdown *element objec
 
 Another aim of this project is speed. By introducing the *scanner*, we could increase the speed of our parser. Detailed benchmarks will follow soon.
 
-## Accurate
+## Accuracy
 
 Every parser must not abandon accuracy. Eridown will produce accurate results according to the CommonMark specifications. Were you to find any errors in Eridown, feel free to open an issue at our issue tracker.

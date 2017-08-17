@@ -41,4 +41,14 @@ class Test extends FunSuite {
             """.stripMargin
         ) === "<table><tr><th rowspan=\"2\">Left</th><td colspan=\"2\" class=\"center\">Center</td></tr><tr><td class=\"right\">Right</td><td>Left</td></tr></table>")
     }
+
+    test("Definition List 1") {
+        assert(Parser.render(
+            """
+              |; Term : Definition
+              |; Term
+              |: Definition
+            """.stripMargin.trim
+        ) == "<dl><dt>Term </dt><dd>Definition</dd><dt>Term</dt><dd>Definition</dd></dl>")
+    }
 }
