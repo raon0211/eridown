@@ -1,12 +1,13 @@
 package in.suhj.eridown.elements.block
 
 import in.suhj.eridown._
+import in.suhj.eridown.elements.inline.TextGenerator
 
 case class Heading(level: Int, text: String) extends Element {
     def render = s"<h$level>$text</h$level>"
 }
 
-object HeadingGenerator extends Generator {
+object HeadingGenerator extends BlockGenerator {
     override def generators = inlines
     override def fillGenerator = TextGenerator
 

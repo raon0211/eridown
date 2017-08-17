@@ -1,4 +1,4 @@
-package in.suhj.eridown.elements.block
+package in.suhj.eridown.elements
 
 import in.suhj.eridown._
 
@@ -6,7 +6,8 @@ case class Document(val content: String) extends Element {
     def render = content
 }
 
-object DocumentGenerator extends Generator {
+object DocumentGenerator extends MarkdownGenerator {
+    override val isBlock = false
     override def generators = blocks
 
     def generate(content: String): ParseResult = Valid(parse(content), content.length)

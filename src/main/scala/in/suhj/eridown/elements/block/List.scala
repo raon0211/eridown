@@ -1,6 +1,7 @@
 package in.suhj.eridown.elements.block
 
 import in.suhj.eridown._
+import in.suhj.eridown.elements.inline.TextGenerator
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -16,7 +17,7 @@ case class ListItem(text: String, indent: Int, ordered: Boolean) extends Element
     def render = s"<li>$text</li>"
 }
 
-object ListGenerator extends Generator {
+object ListGenerator extends BlockGenerator {
     override def generators = List(ListItemGenerator)
 
     def generate(content: String): ParseResult = {
@@ -71,7 +72,7 @@ object ListGenerator extends Generator {
     }
 }
 
-object ListItemGenerator extends Generator {
+object ListItemGenerator extends BlockGenerator {
     override def generators = inlines
     override def fillGenerator = TextGenerator
 

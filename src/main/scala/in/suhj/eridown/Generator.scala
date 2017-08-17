@@ -1,6 +1,8 @@
 package in.suhj.eridown
 
 import in.suhj.eridown.elements.block._
+import in.suhj.eridown.elements.inline.{BoldGenerator, EmphasisGenerator, TextGenerator}
+
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
@@ -12,18 +14,9 @@ case class Range(start: Int, end: Int)
 case class ElementRange(element: Element, range: Range)
 
 abstract class Generator {
-    protected final def blocks: List[Generator] = List(
-        HeadingGenerator,
-        BlockquoteGenerator,
-        CodeGenerator,
-        ListGenerator,
-        TableGenerator,
-        DefinitionListGenerator
-    )
-    protected final def inlines: List[Generator] = Nil
-
-    protected def generators: List[Generator] = blocks
-    protected def fillGenerator: Generator = ParagraphGenerator
+    protected def generators: List[Generator]
+    protected def fillGenerator: Generator
+    protected def skipToNext(scanner: Scanner)
 
     protected def generate(text: String): ParseResult
 
@@ -39,6 +32,7 @@ abstract class Generator {
         }
         readChild(Nil, text)
     }
+
     protected final def transform(text: String): String = {
         def fillRender(text: String) = fillGenerator.generate(text).asInstanceOf[Valid].element.render
 
@@ -61,13 +55,13 @@ abstract class Generator {
 
                 scanner.position = result.range.end
             } catch {
-                case _: NoSuchElementException => scanner.position += 1
+                case _: NoSuchElementException => skipToNext(scanner)
             }
 
             scanner.skipLineEnd()
         }
 
-        if (elements.isEmpty) fillRender(text)
+        if (elements.isEmpty) return fillRender(text)
 
         var renders = new ListBuffer[String]
 
@@ -90,5 +84,28 @@ abstract class Generator {
         }
 
         renders.mkString
+    }
+}
+
+abstract class MarkdownGenerator extends Generator {
+    protected def blocks: List[MarkdownGenerator] = List(
+        HeadingGenerator,
+        BlockquoteGenerator,
+        CodeGenerator,
+        ListGenerator,
+        TableGenerator,
+        DefinitionListGenerator
+    )
+    protected def inlines: List[MarkdownGenerator] = List(
+        BoldGenerator,
+        EmphasisGenerator
+    )
+
+    val isBlock: Boolean
+    override def generators = if (isBlock) inlines else blocks
+    override def fillGenerator = if (isBlock) TextGenerator else ParagraphGenerator
+    override def skipToNext(scanner: Scanner) = {
+        if (isBlock) scanner.skip(1)
+        else scanner.skipToNextLine()
     }
 }

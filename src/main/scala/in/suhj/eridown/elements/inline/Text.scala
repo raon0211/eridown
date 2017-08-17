@@ -1,4 +1,4 @@
-package in.suhj.eridown.elements.block
+package in.suhj.eridown.elements.inline
 
 import in.suhj.eridown._
 
@@ -8,7 +8,7 @@ case class Text(text: String) extends Element {
     def render = escape(text)
 }
 
-object TextGenerator extends Generator {
+object TextGenerator extends InlineGenerator {
     override def generators = Nil
 
     def generate(text: String) = Valid(Text(text), text.length)

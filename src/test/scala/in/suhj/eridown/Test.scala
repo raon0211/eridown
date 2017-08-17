@@ -51,4 +51,30 @@ class Test extends FunSuite {
             """.stripMargin.trim
         ) == "<dl><dt>Term </dt><dd>Definition</dd><dt>Term</dt><dd>Definition</dd></dl>")
     }
+
+    test("Paragraph 1") {
+        assert(Parser.render(
+            """
+              |Hello, eridown!
+            """.stripMargin.trim
+        ) == "<p>Hello, eridown!</p>")
+    }
+
+    test("Paragraph 2") {
+        assert(Parser.render(
+            """
+              |Hello!
+              |
+              |Eridown!
+            """.stripMargin.trim
+        ) == "<p>Hello!</p><p>Eridown!</p>")
+    }
+
+    test("Bold 1") {
+        assert(Parser.render(
+            """
+              |Hello, **eridown**
+            """.stripMargin.trim
+        ) == "<p>Hello, <b>eridown</b></p>")
+    }
 }

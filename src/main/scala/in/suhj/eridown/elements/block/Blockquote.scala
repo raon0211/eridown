@@ -1,15 +1,13 @@
 package in.suhj.eridown.elements.block
 
 import in.suhj.eridown._
+import in.suhj.eridown.elements.inline.TextGenerator
 
 case class Blockquote(text: String) extends Element {
     def render = s"<blockquote>$text</blockquote>"
 }
 
-object BlockquoteGenerator extends Generator {
-    override def generators = inlines
-    override def fillGenerator = TextGenerator
-
+object BlockquoteGenerator extends BlockGenerator {
     def generate(content: String) = {
         val scanner = Scanner(content)
 

@@ -6,7 +6,8 @@ case class Code(language: String, text: String) extends Element {
     def render = s"""<pre class="lang-$language"><code>${text.trim}</code></pre>"""
 }
 
-object CodeGenerator extends Generator {
+object CodeGenerator extends BlockGenerator {
+    override val isBlock = true
     override def generators = Nil
 
     def generate(content: String): ParseResult = {

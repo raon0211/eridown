@@ -1,6 +1,7 @@
 package in.suhj.eridown.elements.block
 
 import in.suhj.eridown._
+import in.suhj.eridown.elements.inline.TextGenerator
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
@@ -41,7 +42,7 @@ case class TableData(text: String, alignment: TableDataAlignment, isHeader: Bool
     }
 }
 
-object TableGenerator extends Generator {
+object TableGenerator extends BlockGenerator {
     override def generators = List(TableRowGenerator)
 
     def generate(text: String): ParseResult = {
@@ -98,7 +99,7 @@ object TableGenerator extends Generator {
     }
 }
 
-object TableRowGenerator extends Generator {
+object TableRowGenerator extends BlockGenerator {
     override def generators = List(TableDataGenerator)
 
     def generate(text: String): ParseResult = {
@@ -109,7 +110,7 @@ object TableRowGenerator extends Generator {
     }
 }
 
-object TableDataGenerator extends Generator {
+object TableDataGenerator extends BlockGenerator {
     override def generators = inlines
     override def fillGenerator = TextGenerator
 
