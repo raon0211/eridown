@@ -67,7 +67,7 @@ class Scanner private (
     }
 
     def seek(char: Char): Int = seek(String.valueOf(char))
-    def seek(str: String): Int =  {
+    def seek(str: String): Int = {
         val index = buffer.indexOf(str, position)
         if (index >= 0) index - position
         else -1
