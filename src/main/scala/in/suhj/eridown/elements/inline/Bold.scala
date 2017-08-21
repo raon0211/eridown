@@ -1,12 +1,13 @@
 package in.suhj.eridown.elements.inline
 
 import in.suhj.eridown._
+import in.suhj.eridown.core._
 
 case class Bold(text: String) extends Element {
     def render = s"<b>$text</b>"
 }
 
-object BoldGenerator extends InlineGenerator {
+object BoldGenerator extends Generator {
     def generate(text: String): ParseResult = {
         val scanner = Scanner(text)
 

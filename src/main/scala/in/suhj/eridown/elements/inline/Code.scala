@@ -1,12 +1,13 @@
 package in.suhj.eridown.elements.inline
 
 import in.suhj.eridown._
+import in.suhj.eridown.core._
 
 case class CodeInline(text: String) extends Element {
     def render = s"<code>$text</code>"
 }
 
-object CodeInlineGenerator extends InlineGenerator {
+object CodeInlineGenerator extends Generator {
     def generate(text: String): ParseResult = {
         val scanner = Scanner(text)
 

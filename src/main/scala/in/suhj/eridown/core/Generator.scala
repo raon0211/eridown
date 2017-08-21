@@ -1,6 +1,6 @@
-package in.suhj.eridown
+package in.suhj.eridown.core
 
-import in.suhj.eridown.elements.block._
+import in.suhj.eridown.option.Option._
 import in.suhj.eridown.elements.inline._
 
 import scala.annotation.tailrec
@@ -14,9 +14,9 @@ case class Range(start: Int, end: Int)
 case class ElementRange(element: Element, range: Range)
 
 abstract class Generator {
-    protected def generators: List[Generator]
-    protected def fillGenerator: Generator
-    protected def skipToNext(scanner: Scanner)
+    protected def generators: List[Generator] = inlines
+    protected def fillGenerator: Generator = TextGenerator
+    protected def skipToNext(scanner: Scanner) = scanner.skip(1)
 
     protected def generate(text: String): ParseResult
 
@@ -30,6 +30,7 @@ abstract class Generator {
                 }
             }
         }
+
         readChild(Nil, text)
     }
 
@@ -64,7 +65,8 @@ abstract class Generator {
         if (elements.isEmpty) return fillRender(text)
 
         var renders = new ListBuffer[String]
-        elements += ElementRange(Text(""), Range(text.length, text.length)) // For the sake of the last plain text to be processed
+        // For the sake of the last plain text to be processed
+        elements += ElementRange(Text(""), Range(text.length, text.length))
 
         for {
             i <- elements.indices
@@ -86,31 +88,4 @@ abstract class Generator {
 
         renders.mkString
     }
-}
-
-abstract class MarkdownGenerator extends Generator {
-    protected def blocks: List[MarkdownGenerator] = List(
-        HeadingGenerator,
-        BlockquoteGenerator,
-        CodeGenerator,
-        ListGenerator,
-        TableGenerator,
-        DefinitionListGenerator,
-        NoFormatGenerator
-    )
-    protected def inlines: List[MarkdownGenerator] = List(
-        BoldGenerator,
-        EmphasisGenerator,
-        StrikeGenerator,
-        CodeInlineGenerator,
-        LinkGenerator,
-        ImageGenerator,
-        DefaultHtmlTagGenerator,
-        NoFormatInlineGenerator
-    )
-
-    val isBlock: Boolean
-    override def generators: List[Generator] = inlines
-    override def fillGenerator: Generator = TextGenerator
-    override def skipToNext(scanner: Scanner) = scanner.skip(1)
 }

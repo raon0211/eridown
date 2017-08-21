@@ -1,6 +1,7 @@
 package in.suhj.eridown.elements.block
 
 import in.suhj.eridown._
+import in.suhj.eridown.core._
 import in.suhj.eridown.elements.inline.TextGenerator
 
 import scala.annotation.tailrec
@@ -42,7 +43,7 @@ case class TableData(text: String, alignment: TableDataAlignment, isHeader: Bool
     }
 }
 
-object TableGenerator extends BlockGenerator {
+object TableGenerator extends Generator {
     def generate(text: String): ParseResult = {
         val result = getChildrenData(TableRowGenerator, text)
         if (result.isEmpty) return Invalid()
@@ -97,7 +98,7 @@ object TableGenerator extends BlockGenerator {
     }
 }
 
-object TableRowGenerator extends BlockGenerator {
+object TableRowGenerator extends Generator {
     def generate(text: String): ParseResult = {
         val result = getChildrenData(TableDataGenerator, text).map(_.element.asInstanceOf[TableData])
         if (result.isEmpty) return Invalid()
@@ -106,7 +107,7 @@ object TableRowGenerator extends BlockGenerator {
     }
 }
 
-object TableDataGenerator extends BlockGenerator {
+object TableDataGenerator extends Generator {
     def generate(text: String): ParseResult = {
         import TableDataAlignment._
 

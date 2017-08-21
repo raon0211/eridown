@@ -1,12 +1,13 @@
 package in.suhj.eridown.elements.inline
 
 import in.suhj.eridown._
+import in.suhj.eridown.core._
 
 case class Emphasis(text: String) extends Element {
     def render = s"<em>$text</em>"
 }
 
-object EmphasisGenerator extends InlineGenerator {
+object EmphasisGenerator extends Generator {
     def generate(text: String): ParseResult = {
         val scanner = Scanner(text)
 

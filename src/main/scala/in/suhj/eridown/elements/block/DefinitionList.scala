@@ -1,6 +1,7 @@
 package in.suhj.eridown.elements.block
 
 import in.suhj.eridown._
+import in.suhj.eridown.core._
 import in.suhj.eridown.elements.inline.TextGenerator
 
 import scala.collection.mutable.ListBuffer
@@ -16,7 +17,7 @@ case class DefinitionItem(text: String, isTerm: Boolean) extends Element {
     }
 }
 
-object DefinitionListGenerator extends BlockGenerator {
+object DefinitionListGenerator extends Generator {
     override def generators = List(DefinitionItemGenerator)
 
     def generate(content: String): ParseResult = {
@@ -33,7 +34,7 @@ object DefinitionListGenerator extends BlockGenerator {
     }
 }
 
-object DefinitionItemGenerator extends BlockGenerator {
+object DefinitionItemGenerator extends Generator {
     def generate(content: String): ParseResult = {
         val scanner = Scanner(content)
 

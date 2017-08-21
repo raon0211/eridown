@@ -1,6 +1,7 @@
 package in.suhj.eridown.elements.inline
 
 import in.suhj.eridown._
+import in.suhj.eridown.core._
 
 import xml.Utility.escape
 
@@ -8,7 +9,7 @@ case class Link(content: String, link: String) extends Element {
     def render = s"""<a href="$link">$content</a>"""
 }
 
-object LinkGenerator extends InlineGenerator {
+object LinkGenerator extends Generator {
     def generate(text: String): ParseResult = {
         val scanner = Scanner(text)
 

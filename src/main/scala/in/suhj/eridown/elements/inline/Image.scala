@@ -1,6 +1,7 @@
 package in.suhj.eridown.elements.inline
 
 import in.suhj.eridown._
+import in.suhj.eridown.core._
 
 import xml.Utility.escape
 
@@ -8,7 +9,7 @@ case class Image(content: String, link: String) extends Element {
     def render = s"""<img src="$link" alt="$content">"""
 }
 
-object ImageGenerator extends InlineGenerator {
+object ImageGenerator extends Generator {
     def generate(text: String): ParseResult = {
         val scanner = Scanner(text)
 

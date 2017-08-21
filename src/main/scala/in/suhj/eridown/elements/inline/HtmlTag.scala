@@ -1,12 +1,13 @@
 package in.suhj.eridown.elements.inline
 
 import in.suhj.eridown._
+import in.suhj.eridown.core._
 
 case class HtmlTag(content: String) extends Element {
     def render: String = content
 }
 
-abstract class HtmlTagGenerator extends InlineGenerator {
+abstract class HtmlTagGenerator extends Generator {
     protected val allowedTags: Set[String]
     protected val allowedAttributes: Map[String, List[String]]
 
