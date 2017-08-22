@@ -7,7 +7,7 @@ Eridown
 import in.suhj.eridown.Parser
 
 println(Parser.render("Hello, *eridown*!"))
-// -> Hello, <em>eridown</em>!
+// -> <p>Hello, <em>eridown</em>!</p>
 ```
 
 Eridown is a project that aims for a *scalable*(also *extensible*), *fast*, and *accurate* Markdown parser written in the powerful Scala language. Also, it provides an extension of Markdown, named *Eridown*, which has many convenient syntaxes such as tables, definition lists, and no-format elements. It automatically sanitizes HTML, too!
@@ -20,7 +20,7 @@ The main aim of this project is to support scalability in markdown parsers. Many
 
 However Eridown changes this paradigm. Let's take an example of extending Eridown. By only writing a markdown *element class* and *generator object*, you can easily extend the markdown syntax.
 
-Suppose that we want to make our own `Big` inline element, which generates a bigger-sized <span style="font-size: 1.25em">Text</span> from `+Text+`. If the input is like:
+Suppose that we want to make our own `Capitalized` inline element, which generates a capitalized `TEXT` from `+text+`. If the input is like:
 
 ```
 Eridown is an +awesome+ markdown parser!
@@ -28,18 +28,18 @@ Eridown is an +awesome+ markdown parser!
 
 the output would be:
 
-> Eridown is an <span style="font-size: 1.25em">awesome</span> markdown parser!
+> Eridown is an AWESOME markdown parser!
 
 We write the code as following:
 
 ```scala
 import in.suhj.eridown._
 
-case class Big(text: String) extends Element {
-    def render = s"<span style=\"font-size: 1.25em\">$text</span>"
+case class Capitalized(text: String) extends Element {
+    def render = s"<span style=\"text-transform: uppercase;\">$text</span>"
 }
 
-object BigGenerator extends Generator {
+object CapitalizedGenerator extends Generator {
     def generate(text: String): ParseResult = {
         if (text(0) != '+') return Invalid()
 
@@ -49,25 +49,21 @@ object BigGenerator extends Generator {
         val content = text.substring(1, index)
         if (content.isEmpty) return Invalid()
 
-        val element = Big(transform(content))
+        val element = Capitalized(transform(content))
         Valid(element, index + 1)
     }
 }
 ```
 
-The class `Big` is our element class, which is used to store data and render that data afterwards.
-
-The generator object, in this case `BigGenerator`, is what matches the pattern from the document and 'generates' the element object from it.
+The class `Capitalized` is our element class, which is used to store data and render that data afterwards. The generator object, in this case `CapitalizedGenerator`, is what matches the pattern from the document and 'generates' the element object from it.
 
 The `generate` method of generator object is provided the text which starts from the position where the element is expected to begin. It is given any substring of the input: it may be something like `+awesome+ markdown parser!`(which will succeed in matching the pattern) or `kdown parser!`(which will fail).
 
 Inside `generate`, we first check if the given text matches our start condition. If the text doesn't start with `+`, it is not our pattern. Whenever the text doesn't match our pattern, we must return the `Invalid` result. So we return the `Invalid` object.
 
-Also, if the closing `+` doesn't exist, it doesn't match our pattern. Hence we also return the `Invalid` result then.
+Also, if the closing `+` doesn't exist, it doesn't match our pattern. Hence we also return the `Invalid` result then. Afterwards, we extract the content surronded by two `+`s. 
 
-Afterwards, we extract the content surronded by two `+`s. 
-
-We now produce our final `Big` element object. The method `transform` parses nested elements and return the rendered text of it.
+We now produce our final `Capitalized` element object. The method `transform` parses nested elements and return the rendered text of it.
 
 Finally, we return the `Valid` object, which has as the fields the element and `rawLength: Int`, indicating the length of our element at the raw text. The valid `rawLength` has to be returned in order to parse the next element following correctly.
 
@@ -77,7 +73,7 @@ Easy, huh? The work left to be done is only registering the generator object by 
 import in.suhj.eridown.Parser
 import in.suhj.eridown.option.Constants._
 
-val myInlines = eridownInlines ::: List(BigGenerator)
+val myInlines = eridownInlines ::: List(CapitalizedGenerator)
 println(Parser.render("Some +text+", eridownBlocks, myInlines))
 ```
 
@@ -107,10 +103,10 @@ abstract class Element {
 }
 ```
 
-A simple example of the element would be the `Big` element mentioned [above](#scalability):
+A simple example of the element would be the `Capitalized` element mentioned [above](#scalability):
 
 ```scala
-case class Big(text: String) extends Element {
+case class Capitalized(text: String) extends Element {
     def render = s"<span style=\"font-size: 1.25em\">$text</span>"
 }
 ```
@@ -141,12 +137,12 @@ A simple example of the generator object is written [above](#scalability). Have 
 
 When you write your generator object, it is hard to calculate all the indexes and length of the string. For people's convenience, we have implemented the `Scanner` class, which makes you deal with strings efficiently. 
 
-We can rewrite the code of the `Big` element's generator object as following, when using the `Scanner` class:
+We can rewrite the code of the `Capitalized` element's generator object as following, when using the `Scanner` class:
 
 ```scala
 import in.suhj.eridown.core.Scanner
 
-object BigGenerator extends Generator {
+object CapitalizedGenerator extends Generator {
     def generate(text: String): ParseResult = {
         val scanner = Scanner(text)
 
@@ -159,7 +155,7 @@ object BigGenerator extends Generator {
         val content = scanner.extract
         if (content.isEmpty) return Invalid()
 
-        Valid(Big(transform(content)), scanner.position + 1)
+        Valid(Capitalized(transform(content)), scanner.position + 1)
     }
 }
 ```
