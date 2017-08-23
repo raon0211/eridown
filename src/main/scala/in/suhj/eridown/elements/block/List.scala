@@ -19,11 +19,11 @@ case class ListItem(text: String, indent: Int, ordered: Boolean) extends Element
 }
 
 object ListGenerator extends Generator {
-    def generate(content: String): ParseResult = {
+    def generate(content: String): Option[ParseResult] = {
         val items = getChildrenData(ListItemGenerator, content)
-        if (items.isEmpty) return Invalid()
+        if (items.isEmpty) return None
 
-        def createListHierarchy(items: List[Valid]): (Element, Int) = {
+        def createListHierarchy(items: List[ParseResult]): (Element, Int) = {
             var totalOffset = 0
             val root: ListElement = ListElement(new ListBuffer)
 
@@ -34,7 +34,7 @@ object ListGenerator extends Generator {
                 i <- items.indices
                 prev = i - 1
             } {
-                val Valid(elem, length) = items(i)
+                val ParseResult(elem, length) = items(i)
                 val item = elem.asInstanceOf[ListItem]
                 val level = item.indent
 
@@ -67,12 +67,12 @@ object ListGenerator extends Generator {
         }
 
         val (root, totalOffset) = createListHierarchy(items)
-        Valid(root, totalOffset)
+        Some(ParseResult(root, totalOffset))
     }
 }
 
 object ListItemGenerator extends Generator {
-    def generate(text: String): ParseResult = {
+    def generate(text: String): Option[ParseResult] = {
         val scanner = Scanner(text)
         var indent = 0
 
@@ -113,7 +113,7 @@ object ListItemGenerator extends Generator {
         val ordered = isOrdered()
 
         if (!unordered && !ordered) {
-            return Invalid()
+            return None
         }
 
         scanner.skipWhitespace()
@@ -123,6 +123,16 @@ object ListItemGenerator extends Generator {
         val skipNewline =
             if (scanner.currentChar == '\n' || scanner.currentChar == '\r') 1
             else 0
-        Valid(ListItem(transform(scanner.extract), indent, ordered), scanner.position + skipNewline)
+
+        Some(
+            ParseResult(
+                ListItem(
+                    transform(scanner.extract),
+                    indent,
+                    ordered
+                ),
+                scanner.position + skipNewline
+            )
+        )
     }
 }

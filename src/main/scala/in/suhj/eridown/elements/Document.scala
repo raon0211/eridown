@@ -13,8 +13,8 @@ object DocumentGenerator extends Generator {
     override def fillGenerator = ParagraphGenerator
     override def skipToNext(scanner: Scanner) = scanner.skipToNextLine()
 
-    def generate(content: String): ParseResult =
-        Valid(parse(content), content.length)
+    def generate(content: String): Option[ParseResult] =
+        Some(ParseResult(parse(content), content.length))
     def parse(content: String): Document =
         Document(transform(content))
 }

@@ -8,11 +8,11 @@ case class Code(language: String, text: String) extends Element {
 }
 
 object CodeGenerator extends Generator {
-    def generate(content: String): ParseResult = {
+    def generate(content: String): Option[ParseResult] = {
         val scanner = Scanner(content)
 
         if (!scanner.reads("```") || scanner.reads("````"))
-            return Invalid()
+            return None
         scanner.skip(3)
 
         scanner.mark()
@@ -22,10 +22,10 @@ object CodeGenerator extends Generator {
 
         scanner.mark()
         if (!scanner.find("```"))
-            return Invalid()
+            return None
         val text = scanner.extract
 
         scanner.skip(3)
-        Valid(Code(lang, text), scanner.position)
+        Some(ParseResult(Code(lang, text), scanner.position))
     }
 }

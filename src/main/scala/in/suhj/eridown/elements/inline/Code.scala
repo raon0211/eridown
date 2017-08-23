@@ -8,17 +8,17 @@ case class CodeInline(text: String) extends Element {
 }
 
 object CodeInlineGenerator extends Generator {
-    def generate(text: String): ParseResult = {
+    def generate(text: String): Option[ParseResult] = {
         val scanner = Scanner(text)
 
-        if (!scanner.reads("`")) return Invalid()
+        if (!scanner.reads("`")) return None
         scanner.skip(1)
 
         scanner.mark()
-        if (!scanner.find("`")) return Invalid()
+        if (!scanner.find("`")) return None
         val content = scanner.extract
 
-        if (content.isEmpty) Invalid()
-        else Valid(CodeInline(content), scanner.position + 1)
+        if (content.isEmpty) None
+        else Some(ParseResult(CodeInline(content), scanner.position + 1))
     }
 }

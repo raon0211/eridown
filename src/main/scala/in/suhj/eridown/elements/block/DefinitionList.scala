@@ -20,9 +20,9 @@ case class DefinitionItem(text: String, isTerm: Boolean) extends Element {
 object DefinitionListGenerator extends Generator {
     override def generators = List(DefinitionItemGenerator)
 
-    def generate(content: String): ParseResult = {
+    def generate(content: String): Option[ParseResult] = {
         val children = getChildrenData(DefinitionItemGenerator, content)
-        if (children.isEmpty) return Invalid()
+        if (children.isEmpty) return None
 
         var totalOffset = 0
         val items = children.map((child) => {
@@ -30,17 +30,17 @@ object DefinitionListGenerator extends Generator {
             child.element
         })
 
-        Valid(DefinitionList(items), totalOffset)
+        Some(ParseResult(DefinitionList(items), totalOffset))
     }
 }
 
 object DefinitionItemGenerator extends Generator {
-    def generate(content: String): ParseResult = {
+    def generate(content: String): Option[ParseResult] = {
         val scanner = Scanner(content)
 
         val isTerm = scanner.reads(';')
         val isDefinition = scanner.reads(':')
-        if (!isTerm && !isDefinition) return Invalid()
+        if (!isTerm && !isDefinition) return None
 
         scanner.skip(1)
         scanner.skipWhitespace()
@@ -55,6 +55,6 @@ object DefinitionItemGenerator extends Generator {
             scanner.skipLineEnd()
         }
 
-        Valid(DefinitionItem(text, isTerm), scanner.position)
+        Some(ParseResult(DefinitionItem(text, isTerm), scanner.position))
     }
 }

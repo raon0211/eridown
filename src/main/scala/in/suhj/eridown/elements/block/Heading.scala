@@ -9,10 +9,10 @@ case class Heading(level: Int, text: String) extends Element {
 }
 
 object HeadingGenerator extends Generator {
-    def generate(content: String): ParseResult = {
+    def generate(content: String): Option[ParseResult] = {
         val scanner = Scanner(content)
 
-        if (scanner.currentChar != '#') Invalid()
+        if (scanner.currentChar != '#') None
         else {
             var level: Int = 0
 
@@ -27,7 +27,7 @@ object HeadingGenerator extends Generator {
             scanner.skipToLineEnd()
             val text = scanner.extract
 
-            Valid(Heading(level, transform(text)), scanner.position)
+            Some(ParseResult(Heading(level, transform(text)), scanner.position))
         }
     }
 }

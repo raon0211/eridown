@@ -9,10 +9,10 @@ case class Blockquote(text: String) extends Element {
 }
 
 object BlockquoteGenerator extends Generator {
-    def generate(content: String) = {
+    def generate(content: String): Option[ParseResult] = {
         val scanner = Scanner(content)
 
-        if (!scanner.reads(">")) Invalid()
+        if (!scanner.reads(">")) None
         else {
             scanner.skip(1)
             scanner.skipWhitespace()
@@ -21,7 +21,7 @@ object BlockquoteGenerator extends Generator {
             scanner.skipToLineEnd()
             val text = scanner.extract
 
-            Valid(Blockquote(transform(text)), scanner.position)
+            Some(ParseResult(Blockquote(transform(text)), scanner.position))
         }
     }
 }

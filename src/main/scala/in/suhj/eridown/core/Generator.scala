@@ -6,9 +6,7 @@ import in.suhj.eridown.elements.inline._
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-abstract class ParseResult
-case class Valid(element: Element, rawLength: Int) extends ParseResult
-case class Invalid() extends ParseResult
+case class ParseResult(element: Element, rawLength: Int)
 
 case class Range(start: Int, end: Int)
 case class ElementRange(element: Element, range: Range)
@@ -18,14 +16,14 @@ abstract class Generator {
     protected def fillGenerator: Generator = TextGenerator
     protected def skipToNext(scanner: Scanner) = scanner.skip(1)
 
-    protected def generate(text: String): ParseResult
+    protected def generate(text: String): Option[ParseResult]
 
-    protected final def getChildrenData(generator: Generator, text: String): List[Valid] = {
+    protected final def getChildrenData(generator: Generator, text: String): List[ParseResult] = {
         @tailrec
-        def readChild(items: List[Valid], text: String): List[Valid] = {
+        def readChild(items: List[ParseResult], text: String): List[ParseResult] = {
             generator.generate(text) match {
-                case Invalid() => items.reverse
-                case valid @ Valid(_, length) => {
+                case None => items.reverse
+                case Some(valid @ ParseResult(_, length)) => {
                     readChild(valid :: items, text.substring(length))
                 }
             }
@@ -35,7 +33,9 @@ abstract class Generator {
     }
 
     protected final def transform(text: String): String = {
-        def fillRender(text: String) = fillGenerator.generate(text).asInstanceOf[Valid].element.render
+        def fillRender(text: String) = (fillGenerator.generate(text): @unchecked) match {
+            case Some(result) => result.element.render
+        }
 
         if (generators.isEmpty) return fillRender(text)
 
@@ -46,8 +46,9 @@ abstract class Generator {
             @tailrec
             def generate(generators: List[Generator]): ElementRange =
                 generators.head.generate(scanner.ahead) match {
-                    case Valid(elem, length) => ElementRange(elem, Range(scanner.position, scanner.position + length))
-                    case Invalid() => generate(generators.tail)
+                    case Some(ParseResult(elem, length)) =>
+                        ElementRange(elem, Range(scanner.position, scanner.position + length))
+                    case None => generate(generators.tail)
                 }
 
             try {

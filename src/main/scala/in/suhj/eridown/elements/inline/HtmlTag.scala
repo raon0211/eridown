@@ -11,44 +11,44 @@ abstract class HtmlTagGenerator extends Generator {
     protected val allowedTags: Set[String]
     protected val allowedAttributes: Map[String, List[String]]
 
-    def generate(text: String): ParseResult = {
+    def generate(text: String): Option[ParseResult] = {
         val scanner = Scanner(text)
 
-        if (!scanner.reads('<')) return Invalid()
+        if (!scanner.reads('<')) return None
         scanner.skip(1)
 
         if (scanner.reads("!--")) {
             if (scanner.find("-->")) {
                 val endIndex = scanner.position + 3
-                return Valid(HtmlTag(text.substring(0, endIndex)), endIndex)
-            } else return Invalid()
+                return Some(ParseResult(HtmlTag(text.substring(0, endIndex)), endIndex))
+            } else return None
         }
 
         if (scanner.reads('/')) scanner.skip(1)
 
         val name = scanner.extractIdentifier
-        if (name.isEmpty) return Invalid()
-        else if (!allowedTags.contains(name)) return Invalid()
+        if (name.isEmpty) return None
+        else if (!allowedTags.contains(name)) return None
 
         while (!scanner.atEnd) {
             scanner.skipWhitespace()
 
             if (scanner.reads("/>"))
-                return Valid(HtmlTag(text.substring(0, scanner.position + 2)), scanner.position + 2)
+                return Some(ParseResult(HtmlTag(text.substring(0, scanner.position + 2)), scanner.position + 2))
             if (scanner.reads('>'))
-                return Valid(HtmlTag(text.substring(0, scanner.position + 1)), scanner.position + 1)
+                return Some(ParseResult(HtmlTag(text.substring(0, scanner.position + 1)), scanner.position + 1))
 
             val key = scanner.extractIdentifier
-            if (!allowedAttributes(name).contains(key)) return Invalid()
+            if (!allowedAttributes(name).contains(key)) return None
 
             if (scanner.reads('=')) {
                 scanner.skip(1)
 
-                if (!scanner.find('>') || !scanner.find(' ')) return Invalid()
+                if (!scanner.find('>') || !scanner.find(' ')) return None
             }
         }
 
-        Invalid()
+        None
     }
 }
 

@@ -44,9 +44,9 @@ case class TableData(text: String, alignment: TableDataAlignment, isHeader: Bool
 }
 
 object TableGenerator extends Generator {
-    def generate(text: String): ParseResult = {
+    def generate(text: String): Option[ParseResult] = {
         val result = getChildrenData(TableRowGenerator, text)
-        if (result.isEmpty) return Invalid()
+        if (result.isEmpty) return None
 
         val rows = new ListBuffer[TableRow]
         var totalOffset = 0
@@ -94,28 +94,28 @@ object TableGenerator extends Generator {
             rows.toList
         }
 
-        Valid(Table(setSpans(rows).map(_.render).mkString), totalOffset)
+        Some(ParseResult(Table(setSpans(rows).map(_.render).mkString), totalOffset))
     }
 }
 
 object TableRowGenerator extends Generator {
-    def generate(text: String): ParseResult = {
+    def generate(text: String): Option[ParseResult] = {
         val result = getChildrenData(TableDataGenerator, text).map(_.element.asInstanceOf[TableData])
-        if (result.isEmpty) return Invalid()
+        if (result.isEmpty) return None
 
-        Valid(TableRow(new ListBuffer[TableData] ++= result), text.indexOf('\n') + 1)
+        Some(ParseResult(TableRow(new ListBuffer[TableData] ++= result), text.indexOf('\n') + 1))
     }
 }
 
 object TableDataGenerator extends Generator {
-    def generate(text: String): ParseResult = {
+    def generate(text: String): Option[ParseResult] = {
         import TableDataAlignment._
 
         val scanner = Scanner(text)
 
         val delim = scanner.currentChar
         if (delim != '|' && delim != '^')
-            return Invalid()
+            return None
         scanner.skip(1)
 
         var leadingSpaces = 0
@@ -126,8 +126,8 @@ object TableDataGenerator extends Generator {
         scanner.mark()
 
         val seek = scanner.seekAny(List('|', '^'))
-        if (seek < 0) return Invalid()
-        else if (scanner.seek('\n') < seek) return Invalid()
+        if (seek < 0) return None
+        else if (scanner.seek('\n') < seek) return None
         scanner.skip(seek - 1)
 
         var trailingSpaces = 0
@@ -142,6 +142,6 @@ object TableDataGenerator extends Generator {
             else if (leadingSpaces >= 2) Right
             else Left
 
-        Valid(TableData(scanner.extract, alignment, delim == '^'), scanner.position + trailingSpaces)
+        Option(ParseResult(TableData(scanner.extract, alignment, delim == '^'), scanner.position + trailingSpaces))
     }
 }

@@ -40,32 +40,30 @@ case class Capitalized(text: String) extends Element {
 }
 
 object CapitalizedGenerator extends Generator {
-    def generate(text: String): ParseResult = {
-        if (text(0) != '+') return Invalid()
+    def generate(text: String): Option[ParseResult] = {
+        if (text(0) != '+') return None
 
         val index = text.indexOf('+', 1)
-        if (index < 0) return Invalid()
+        if (index < 0) return None
 
         val content = text.substring(1, index)
-        if (content.isEmpty) return Invalid()
+        if (content.isEmpty) return None
 
         val element = Capitalized(transform(content))
-        Valid(element, index + 1)
+        Some(ParseResult(element, index + 1))
     }
 }
 ```
 
 The class `Capitalized` is our element class, which is used to store data and render that data afterwards. The generator object, in this case `CapitalizedGenerator`, is what matches the pattern from the document and 'generates' the element object from it.
 
-The `generate` method of generator object is provided the text which starts from the position where the element is expected to begin. It is given any substring of the input: it may be something like `+awesome+ markdown parser!`(which will succeed in matching the pattern) or `kdown parser!`(which will fail).
+The `generate` method of generator object is provided the text which starts from the position where the element is expected to begin. It is given any substring of the input: it may be something like `+awesome+ markdown parser!`(which will succeed in matching the pattern) or `kdown parser!`(which will fail). If it succeeds in parsing the text, it returns `ParseResult`. Otherwise, it returns `None`. That's why the `generate` method's return type is `Option[ParseResult]`.
 
-Inside `generate`, we first check if the given text matches our start condition. If the text doesn't start with `+`, it is not our pattern. Whenever the text doesn't match our pattern, we must return the `Invalid` result. So we return the `Invalid` object.
-
-Also, if the closing `+` doesn't exist, it doesn't match our pattern. Hence we also return the `Invalid` result then. Afterwards, we extract the content surronded by two `+`s. 
+Inside `generate`, we first check if the given text matches our starting condition. If the text doesn't start with `+`, it is not our pattern.  So we return `None`. Also, if the closing `+` doesn't exist, it doesn't match our pattern. Hence we also return the `Invalid` result then. Afterwards, we extract the content surronded by two `+`s. 
 
 We now produce our final `Capitalized` element object. The method `transform` parses nested elements and return the rendered text of it.
 
-Finally, we return the `Valid` object, which has as the fields the element and `rawLength: Int`, indicating the length of our element at the raw text. The valid `rawLength` has to be returned in order to parse the next element following correctly.
+Finally, we return the `ParseResult` object, which has as the fields the element and `rawLength: Int`, indicating the length of our element at the raw text. The valid `rawLength` has to be returned in order to parse the next element following correctly.
 
 Easy, huh? The work left to be done is only registering the generator object by specifying the parameters `blocks` and `inlines`:
 
@@ -116,18 +114,18 @@ case class Capitalized(text: String) extends Element {
 The generator object is what matches the pattern from the document and generates the element from it. Every generator object extends the abstract `Generator` class. By extending the `Generator` class, you *have to* define the method:
 
 ```scala
-def generate(text: String): ParseResult
+def generate(text: String): Option[ParseResult]
 ```
 
 It tries to parse the `text` and returns the result of it. The `ParseResult` class is abstract and has two subclasses:
 
 ```scala
 abstract class ParseResult
-case class Valid(element: Element, rawLength: Int) extends ParseResult
-case class Invalid() extends ParseResult
+case class Some(ParseResult(element: Element, rawLength: Int)) extends ParseResult
+case class None extends ParseResult
 ```
 
-Simply you return `Valid(element, rawLength)` when you succeed in parsing, and `Invalid()` when you fail. `rawLength` indicates the length which our element occupies in the text.
+Simply you return `Some(ParseResult(element, rawLength))` when you succeed in parsing, and `None` when you fail. `rawLength` indicates the length which our element occupies in the text.
 
 > ***Note***: You have to return the proper `rawLength` when parsing, otherwise the parser will break. 
 
@@ -143,19 +141,19 @@ We can rewrite the code of the `Capitalized` element's generator object as follo
 import in.suhj.eridown.core.Scanner
 
 object CapitalizedGenerator extends Generator {
-    def generate(text: String): ParseResult = {
+    def generate(text: String): Option[ParseResult] = {
         val scanner = Scanner(text)
 
-        if (!scanner.reads('+')) return Invalid()
+        if (!scanner.reads('+')) return None
         scanner.skip(1)
 
         scanner.mark()
-        if (!scanner.find('+')) return Invalid()
+        if (!scanner.find('+')) return None
 
         val content = scanner.extract
-        if (content.isEmpty) return Invalid()
+        if (content.isEmpty) return None
 
-        Valid(Capitalized(transform(content)), scanner.position + 1)
+        Some(ParseResult(Capitalized(transform(content)), scanner.position + 1))
     }
 }
 ```
@@ -198,7 +196,7 @@ mark:         [
 currentChar: +
 ```
 
-Finally, the `extract` method extracts the substring o f the buffer starting from the marked position(inclusive) and ending at the current position(exclusive). So in this case `scanner.extract == "awesome"`. So based on this result, we create the element object, as we did earlier.
+Finally, the `extract` method extracts the substring of the buffer starting from the marked position(inclusive) and ending at the current position(exclusive). So in this case `scanner.extract == "awesome"`. So based on this result, we create the element object, as we did earlier.
 
 As you can see, using `Scanner` is less error-prone and it provides many convenient methods for you to parse the code. We do not require you to use `Scanner`: it is on your choice. But using it will truly make your code more understandable.
 

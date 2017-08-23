@@ -10,25 +10,25 @@ case class Link(content: String, link: String) extends Element {
 }
 
 object LinkGenerator extends Generator {
-    def generate(text: String): ParseResult = {
+    def generate(text: String): Option[ParseResult] = {
         val scanner = Scanner(text)
 
-        if (!scanner.reads('[')) return Invalid()
+        if (!scanner.reads('[')) return None
         scanner.skip(1)
 
         scanner.mark()
-        if (!scanner.find(']')) return Invalid()
+        if (!scanner.find(']')) return None
         val content = scanner.extract
         scanner.skip(1)
 
-        if (!scanner.reads('(')) return Invalid()
+        if (!scanner.reads('(')) return None
         scanner.skip(1)
 
         scanner.mark()
-        if (!scanner.find(')')) return Invalid()
+        if (!scanner.find(')')) return None
         val link = scanner.extract
         scanner.skip(1)
 
-        Valid(Link(transform(content), link), scanner.position)
+        Some(ParseResult(Link(transform(content), link), scanner.position))
     }
 }

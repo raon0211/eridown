@@ -10,17 +10,17 @@ case class NoFormatInline(text: String) extends Element {
 }
 
 object NoFormatInlineGenerator extends Generator {
-    def generate(text: String): ParseResult = {
+    def generate(text: String): Option[ParseResult] = {
         val scanner = Scanner(text)
 
-        if (!scanner.reads("%%")) return Invalid()
+        if (!scanner.reads("%%")) return None
         scanner.skip(2)
 
         scanner.mark()
-        if (!scanner.find("%%")) return Invalid()
+        if (!scanner.find("%%")) return None
         val content = scanner.extract
 
-        if (content.isEmpty) Invalid()
-        else Valid(NoFormatInline(content), scanner.position + 2)
+        if (content.isEmpty) None
+        else Some(ParseResult(NoFormatInline(content), scanner.position + 2))
     }
 }

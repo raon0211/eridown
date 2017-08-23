@@ -10,15 +10,15 @@ case class NoFormat(text: String) extends Element {
 }
 
 object NoFormatGenerator extends Generator {
-    def generate(content: String): ParseResult = {
+    def generate(content: String): Option[ParseResult] = {
         val scanner = Scanner(content)
 
-        if (!scanner.reads("%%%")) return Invalid()
+        if (!scanner.reads("%%%")) return None
         scanner.skip(3)
         scanner.mark()
 
-        if (!scanner.find("%%%")) return Invalid()
+        if (!scanner.find("%%%")) return None
 
-        Valid(NoFormat(scanner.extract), scanner.position + 3)
+        Some(ParseResult(NoFormat(scanner.extract), scanner.position + 3))
     }
 }
