@@ -44,23 +44,21 @@ abstract class Generator {
 
         while (!scanner.atEnd) {
             @tailrec
-            def generate(generators: List[Generator]): ElementRange =
-                generators.head.generate(scanner.ahead) match {
+            def generate(generators: List[Generator]): Option[ElementRange] =
+                if (generators.isEmpty) None
+                else generators.head.generate(scanner.ahead) match {
                     case Some(ParseResult(elem, length)) =>
-                        ElementRange(elem, Range(scanner.position, scanner.position + length))
+                        Some(ElementRange(elem, Range(scanner.position, scanner.position + length)))
                     case None => generate(generators.tail)
                 }
 
-            try {
-                val result = generate(generators)
-                elements += result
-
-                scanner.position = result.range.end
-            } catch {
-                case _: NoSuchElementException => skipToNext(scanner)
+            generate(generators) match {
+                case Some(elementRange) => {
+                    elements += elementRange
+                    scanner.position = elementRange.range.end
+                }
+                case None => skipToNext(scanner)
             }
-
-            scanner.skipLineEnd()
         }
 
         if (elements.isEmpty) return fillRender(text)
