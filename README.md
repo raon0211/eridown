@@ -117,12 +117,10 @@ The generator object is what matches the pattern from the document and generates
 def generate(text: String): Option[ParseResult]
 ```
 
-It tries to parse the `text` and returns the result of it. The `ParseResult` class is abstract and has two subclasses:
+It tries to parse the `text` and returns the result of it. The `ParseResult` class is a case class:
 
 ```scala
-abstract class ParseResult
-case class Some(ParseResult(element: Element, rawLength: Int)) extends ParseResult
-case class None extends ParseResult
+case class ParseResult(element: Element, rawLength: Int)
 ```
 
 Simply you return `Some(ParseResult(element, rawLength))` when you succeed in parsing, and `None` when you fail. `rawLength` indicates the length which our element occupies in the text.
