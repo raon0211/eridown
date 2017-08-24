@@ -24,13 +24,17 @@ object DefinitionListGenerator extends Generator {
         val children = getChildrenData(DefinitionItemGenerator, content)
         if (children.isEmpty) return None
 
+        val items = new ListBuffer[Element]
         var totalOffset = 0
-        val items = children.map((child) => {
-            totalOffset += child.rawLength
-            child.element
-        })
 
-        Some(ParseResult(DefinitionList(items), totalOffset))
+        for (child <- children) {
+            val (element, length) = child
+
+            items += element
+            totalOffset += length
+        }
+
+        Some((DefinitionList(items.toList), totalOffset))
     }
 }
 
@@ -55,6 +59,6 @@ object DefinitionItemGenerator extends Generator {
             scanner.skipLineEnd()
         }
 
-        Some(ParseResult(DefinitionItem(text, isTerm), scanner.position))
+        Some((DefinitionItem(text, isTerm), scanner.position))
     }
 }

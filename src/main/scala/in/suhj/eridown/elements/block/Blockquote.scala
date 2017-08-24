@@ -21,7 +21,7 @@ object BlockquoteGenerator extends Generator {
             scanner.skipToLineEnd()
             val text = scanner.extract
 
-            Some(ParseResult(Blockquote(transform(text)), scanner.position))
+            Some((Blockquote(transform(text)), scanner.position))
         }
     }
 }

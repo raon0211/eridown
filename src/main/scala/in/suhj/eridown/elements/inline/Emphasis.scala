@@ -19,6 +19,6 @@ object EmphasisGenerator extends Generator {
         val content = scanner.extract
 
         if (content.isEmpty) None
-        else Some(ParseResult(Emphasis(transform(content)), scanner.position + 1))
+        else Some((Emphasis(transform(content)), scanner.position + 1))
     }
 }

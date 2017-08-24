@@ -34,14 +34,14 @@ object ListGenerator extends Generator {
                 i <- items.indices
                 prev = i - 1
             } {
-                val ParseResult(elem, length) = items(i)
+                val (elem, length) = items(i)
                 val item = elem.asInstanceOf[ListItem]
                 val level = item.indent
 
                 def needsNewList = {
                     if (!nodesMap.contains(item.indent)) true
                     else {
-                        val prevLevel = items(i - 1).element.asInstanceOf[ListItem].indent
+                        val prevLevel = items(i - 1)._1.asInstanceOf[ListItem].indent
                         level > prevLevel
                     }
                 }
@@ -67,7 +67,7 @@ object ListGenerator extends Generator {
         }
 
         val (root, totalOffset) = createListHierarchy(items)
-        Some(ParseResult(root, totalOffset))
+        Some((root, totalOffset))
     }
 }
 
@@ -118,21 +118,15 @@ object ListItemGenerator extends Generator {
 
         scanner.skipWhitespace()
         scanner.mark()
-        scanner.skipToLineEnd()
+        scanner.skipToNextLine()
 
-        val skipNewline =
-            if (scanner.currentChar == '\n' || scanner.currentChar == '\r') 1
-            else 0
-
-        Some(
-            ParseResult(
-                ListItem(
-                    transform(scanner.extract),
-                    indent,
-                    ordered
-                ),
-                scanner.position + skipNewline
-            )
-        )
+        Some((
+            ListItem(
+                transform(scanner.extract.trim),
+                indent,
+                ordered
+            ),
+            scanner.position
+        ))
     }
 }

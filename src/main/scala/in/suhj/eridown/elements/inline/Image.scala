@@ -29,6 +29,6 @@ object ImageGenerator extends Generator {
         val link = scanner.extract
         scanner.skip(1)
 
-        Some(ParseResult(Image(content, link), scanner.position))
+        Some((Image(content, link), scanner.position))
     }
 }

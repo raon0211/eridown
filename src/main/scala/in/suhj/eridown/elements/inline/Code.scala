@@ -1,10 +1,10 @@
 package in.suhj.eridown.elements.inline
 
-import in.suhj.eridown._
 import in.suhj.eridown.core._
+import xml.Utility.escape
 
 case class CodeInline(text: String) extends Element {
-    def render = s"<code>$text</code>"
+    def render = s"<code>${escape(text)}</code>"
 }
 
 object CodeInlineGenerator extends Generator {
@@ -19,6 +19,6 @@ object CodeInlineGenerator extends Generator {
         val content = scanner.extract
 
         if (content.isEmpty) None
-        else Some(ParseResult(CodeInline(content), scanner.position + 1))
+        else Some((CodeInline(content), scanner.position + 1))
     }
 }

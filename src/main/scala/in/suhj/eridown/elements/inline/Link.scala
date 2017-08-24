@@ -29,6 +29,6 @@ object LinkGenerator extends Generator {
         val link = scanner.extract
         scanner.skip(1)
 
-        Some(ParseResult(Link(transform(content), link), scanner.position))
+        Some((Link(transform(content), link), scanner.position))
     }
 }

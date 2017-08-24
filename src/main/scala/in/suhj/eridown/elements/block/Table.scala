@@ -52,8 +52,10 @@ object TableGenerator extends Generator {
         var totalOffset = 0
 
         for (res <- result) {
-            rows += res.element.asInstanceOf[TableRow]
-            totalOffset += res.rawLength
+            val (element, length) = res
+
+            rows += element.asInstanceOf[TableRow]
+            totalOffset += length
         }
 
         def setSpans(rows: ListBuffer[TableRow]): List[TableRow] = {
@@ -94,16 +96,16 @@ object TableGenerator extends Generator {
             rows.toList
         }
 
-        Some(ParseResult(Table(setSpans(rows).map(_.render).mkString), totalOffset))
+        Some((Table(setSpans(rows).map(_.render).mkString), totalOffset))
     }
 }
 
 object TableRowGenerator extends Generator {
     def generate(text: String): Option[ParseResult] = {
-        val result = getChildrenData(TableDataGenerator, text).map(_.element.asInstanceOf[TableData])
+        val result = getChildrenData(TableDataGenerator, text).map(_._1.asInstanceOf[TableData])
         if (result.isEmpty) return None
 
-        Some(ParseResult(TableRow(new ListBuffer[TableData] ++= result), text.indexOf('\n') + 1))
+        Some((TableRow(new ListBuffer[TableData] ++= result), text.indexOf('\n') + 1))
     }
 }
 
@@ -142,6 +144,6 @@ object TableDataGenerator extends Generator {
             else if (leadingSpaces >= 2) Right
             else Left
 
-        Option(ParseResult(TableData(scanner.extract, alignment, delim == '^'), scanner.position + trailingSpaces))
+        Option((TableData(scanner.extract, alignment, delim == '^'), scanner.position + trailingSpaces))
     }
 }

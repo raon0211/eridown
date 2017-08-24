@@ -19,6 +19,6 @@ object NoFormatGenerator extends Generator {
 
         if (!scanner.find("%%%")) return None
 
-        Some(ParseResult(NoFormat(scanner.extract), scanner.position + 3))
+        Some((NoFormat(scanner.extract), scanner.position + 3))
     }
 }

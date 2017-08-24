@@ -21,6 +21,6 @@ object NoFormatInlineGenerator extends Generator {
         val content = scanner.extract
 
         if (content.isEmpty) None
-        else Some(ParseResult(NoFormatInline(content), scanner.position + 2))
+        else Some((NoFormatInline(content), scanner.position + 2))
     }
 }

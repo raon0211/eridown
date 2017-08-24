@@ -6,12 +6,12 @@ import in.suhj.eridown.elements.inline._
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-case class ParseResult(element: Element, rawLength: Int)
-
 case class Range(start: Int, end: Int)
 case class ElementRange(element: Element, range: Range)
 
 abstract class Generator {
+    type ParseResult = (Element, Int)
+
     protected def generators: List[Generator] = inlines
     protected def fillGenerator: Generator = TextGenerator
     protected def skipToNext(scanner: Scanner) = scanner.skip(1)
@@ -23,7 +23,7 @@ abstract class Generator {
         def readChild(items: List[ParseResult], text: String): List[ParseResult] = {
             generator.generate(text) match {
                 case None => items.reverse
-                case Some(valid @ ParseResult(_, length)) => {
+                case Some(valid @ (_, length)) => {
                     readChild(valid :: items, text.substring(length))
                 }
             }
@@ -34,7 +34,7 @@ abstract class Generator {
 
     protected final def transform(text: String): String = {
         def fillRender(text: String) = (fillGenerator.generate(text): @unchecked) match {
-            case Some(result) => result.element.render
+            case Some(result) => result._1.render
         }
 
         if (generators.isEmpty) return fillRender(text)
@@ -47,7 +47,7 @@ abstract class Generator {
             def generate(generators: List[Generator]): Option[ElementRange] =
                 if (generators.isEmpty) None
                 else generators.head.generate(scanner.ahead) match {
-                    case Some(ParseResult(elem, length)) =>
+                    case Some((elem, length)) =>
                         Some(ElementRange(elem, Range(scanner.position, scanner.position + length)))
                     case None => generate(generators.tail)
                 }
@@ -78,7 +78,7 @@ abstract class Generator {
 
             val precedingText = text.substring(formerEnd, start)
 
-            if (!precedingText.trim.isEmpty) {
+            if (precedingText.trim.nonEmpty) {
                 renders += fillRender(precedingText)
             }
 

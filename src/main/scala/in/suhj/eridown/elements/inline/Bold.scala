@@ -19,6 +19,6 @@ object BoldGenerator extends Generator {
         val content = scanner.extract
 
         if (content.isEmpty) None
-        else Some(ParseResult(Bold(transform(content)), scanner.position + 2))
+        else Some((Bold(transform(content)), scanner.position + 2))
     }
 }

@@ -20,7 +20,7 @@ abstract class HtmlTagGenerator extends Generator {
         if (scanner.reads("!--")) {
             if (scanner.find("-->")) {
                 val endIndex = scanner.position + 3
-                return Some(ParseResult(HtmlTag(text.substring(0, endIndex)), endIndex))
+                return Some((HtmlTag(text.substring(0, endIndex)), endIndex))
             } else return None
         }
 
@@ -34,9 +34,9 @@ abstract class HtmlTagGenerator extends Generator {
             scanner.skipWhitespace()
 
             if (scanner.reads("/>"))
-                return Some(ParseResult(HtmlTag(text.substring(0, scanner.position + 2)), scanner.position + 2))
+                return Some((HtmlTag(text.substring(0, scanner.position + 2)), scanner.position + 2))
             if (scanner.reads('>'))
-                return Some(ParseResult(HtmlTag(text.substring(0, scanner.position + 1)), scanner.position + 1))
+                return Some((HtmlTag(text.substring(0, scanner.position + 1)), scanner.position + 1))
 
             val key = scanner.extractIdentifier
             if (!allowedAttributes(name).contains(key)) return None

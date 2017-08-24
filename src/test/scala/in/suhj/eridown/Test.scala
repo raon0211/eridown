@@ -17,7 +17,17 @@ class Test extends FunSuite {
               |```scala
               |println("Hello, world!")
               |```
-            """.stripMargin.trim) == """<pre class="lang-scala"><code>println("Hello, world!")</code></pre>""".trim.replaceAll("(\\s|\\r|\\n){2,}", ""))
+            """.stripMargin.trim) == """<pre class="lang-scala"><code>println(&quot;Hello, world!&quot;)
+                                      |</code></pre>""".stripMargin.trim.replaceAll("(\\s|\\r|\\n){2,}", ""))
+    }
+
+    test("Code 2") {
+        assert(Parser.render(
+            s"""
+              |    console.log("Hello, world!");
+              |${"\t"}var a = 1;
+            """.stripMargin) == """<pre><code>console.log(&quot;Hello, world!&quot;);
+                                                 |var a = 1;</code></pre>""".stripMargin)
     }
 
     test("List 1") {

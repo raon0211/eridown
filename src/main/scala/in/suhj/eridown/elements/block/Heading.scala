@@ -27,7 +27,7 @@ object HeadingGenerator extends Generator {
             scanner.skipToLineEnd()
             val text = scanner.extract
 
-            Some(ParseResult(Heading(level, transform(text)), scanner.position))
+            Some((Heading(level, transform(text)), scanner.position))
         }
     }
 }

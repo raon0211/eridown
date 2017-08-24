@@ -50,7 +50,7 @@ object CapitalizedGenerator extends Generator {
         if (content.isEmpty) return None
 
         val element = Capitalized(transform(content))
-        Some(ParseResult(element, index + 1))
+        Some((element, index + 1))
     }
 }
 ```
@@ -117,13 +117,13 @@ The generator object is what matches the pattern from the document and generates
 def generate(text: String): Option[ParseResult]
 ```
 
-It tries to parse the `text` and returns the result of it. The `ParseResult` class is a case class:
+It tries to parse the `text` and returns the result of it. The `ParseResult` type is actually a tuple `(Element, Int)`:
 
 ```scala
-case class ParseResult(element: Element, rawLength: Int)
+type ParseResult = (Element, Int)
 ```
 
-Simply you return `Some(ParseResult(element, rawLength))` when you succeed in parsing, and `None` when you fail. `rawLength` indicates the length which our element occupies in the text.
+Simply you return `Some((element, rawLength))` when you succeed in parsing, and `None` when you fail. `rawLength` indicates the length which our element occupies in the text.
 
 > ***Note***: You have to return the proper `rawLength` when parsing, otherwise the parser will break. 
 
@@ -151,7 +151,7 @@ object CapitalizedGenerator extends Generator {
         val content = scanner.extract
         if (content.isEmpty) return None
 
-        Some(ParseResult(Capitalized(transform(content)), scanner.position + 1))
+        Some((Capitalized(transform(content)), scanner.position + 1))
     }
 }
 ```

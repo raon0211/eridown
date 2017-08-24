@@ -21,6 +21,6 @@ object StrikeGenerator extends Generator {
         val content = scanner.extract
 
         if (content.isEmpty) None
-        else Some(ParseResult(Strike(transform(content)), scanner.position + 2))
+        else Some((Strike(transform(content)), scanner.position + 2))
     }
 }
