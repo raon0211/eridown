@@ -3,6 +3,7 @@ package in.suhj.eridown.elements.block
 import in.suhj.eridown._
 import in.suhj.eridown.core._
 import in.suhj.eridown.elements.inline.TextGenerator
+import in.suhj.eridown.option.Option.blocks
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -72,6 +73,10 @@ object ListGenerator extends Generator {
 }
 
 object ListItemGenerator extends Generator {
+    override def generators = blocks
+    override def fillGenerator = ParagraphGenerator
+    override def skipToNext(scanner: Scanner) = scanner.skipToNextLine()
+
     def generate(text: String): Option[ParseResult] = {
         val scanner = Scanner(text)
         var indent = 0
@@ -81,29 +86,33 @@ object ListItemGenerator extends Generator {
             indent += 1
         }
 
-        def isUnordered() = {
-            if (scanner.currentChar != '*' && scanner.currentChar != '-') false
+        def isUnordered(): Boolean = {
+            if (!scanner.reads("* ") && !scanner.reads("- ")) false
             else {
-                scanner.skip(1)
+                scanner.skip(2)
                 true
             }
         }
-        def isOrdered() = {
+        def isOrdered(): Boolean = {
             val start = scanner.position
 
             if (!Character.isDigit(scanner.currentChar)) false
             else {
                 scanner.skip(1)
 
-                while (Character.isDigit(scanner.currentChar)) {
+                var count = 0
+                while (Character.isDigit(scanner.currentChar) && count < 10) {
+                    count += 1
                     scanner.skip(1)
                 }
 
-                if (!scanner.reads(".")) {
+                if (count >= 10) return false
+
+                if (!scanner.reads(". ")) {
                     scanner.position = start
                     false
                 } else {
-                    scanner.skip(1)
+                    scanner.skip(2)
                     true
                 }
             }
@@ -120,9 +129,12 @@ object ListItemGenerator extends Generator {
         scanner.mark()
         scanner.skipToNextLine()
 
+        val content = scanner.extract.trim
+        if (content.isEmpty) return None
+
         Some((
             ListItem(
-                transform(scanner.extract.trim),
+                transform(content),
                 indent,
                 ordered
             ),

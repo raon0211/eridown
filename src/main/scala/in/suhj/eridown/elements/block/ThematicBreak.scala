@@ -9,9 +9,11 @@ case class ThematicBreak() extends Element {
 object ThematicBreakGenerator extends Generator {
     def generate(text: String): Option[ParseResult] = {
         val scanner = Scanner(text)
+        scanner.skipWhitespace()
+        scanner.mark()
         scanner.skip(3)
 
         if (!List("***", "---", "___").contains(scanner.extract)) None
-        else Some((ThematicBreak(), 3))
+        else Some((ThematicBreak(), scanner.position))
     }
 }

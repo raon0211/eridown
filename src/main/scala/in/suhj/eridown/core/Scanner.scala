@@ -50,7 +50,15 @@ class Scanner private (
         extract
     }
 
-    def skip(offset: Int) = position += offset
+    def skip(offset: Int) = {
+        position += offset
+
+        if (position >= end) {
+            position = end
+        } else if (position < start) {
+            position = start
+        }
+    }
     def skipWhitespace() = {
         while (isWhitespace(currentChar) & !atEnd) {
             skip(1)

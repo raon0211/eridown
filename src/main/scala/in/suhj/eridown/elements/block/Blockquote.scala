@@ -1,21 +1,24 @@
 package in.suhj.eridown.elements.block
 
-import in.suhj.eridown._
 import in.suhj.eridown.core._
-import in.suhj.eridown.elements.inline.TextGenerator
+import in.suhj.eridown.option.Option._
 
 case class Blockquote(text: String) extends Element {
     def render = s"<blockquote>$text</blockquote>"
 }
 
 object BlockquoteGenerator extends Generator {
+    override def generators = blocks
+    override def fillGenerator = ParagraphGenerator
+    override def skipToNext(scanner: Scanner) = scanner.skipToNextLine()
+
     def generate(content: String): Option[ParseResult] = {
         val scanner = Scanner(content)
 
         if (!scanner.reads(">")) None
         else {
             scanner.skip(1)
-            scanner.skipWhitespace()
+            if (scanner.reads(" ")) scanner.skip(1)
 
             scanner.mark()
             scanner.skipToLineEnd()
@@ -25,3 +28,4 @@ object BlockquoteGenerator extends Generator {
         }
     }
 }
+

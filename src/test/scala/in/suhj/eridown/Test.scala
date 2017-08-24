@@ -8,7 +8,7 @@ class Test extends FunSuite {
     }
 
     test("Blockquote 1") {
-        assert(Parser.render("> Blockquote") == "<blockquote>Blockquote</blockquote>")
+        assert(Parser.render("> Blockquote") == "<blockquote><p>Blockquote</p></blockquote>")
     }
 
     test("Code 1") {

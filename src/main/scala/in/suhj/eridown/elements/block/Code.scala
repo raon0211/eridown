@@ -13,10 +13,10 @@ case class Code(language: String, text: String) extends Element {
 object CodeGenerator extends Generator {
     def generate(text: String): Option[ParseResult] = {
         val tabbedCode = CodeTabbedGenerator.generate(text)
-        if (tabbedCode != None) return tabbedCode
+        if (tabbedCode.isDefined) return tabbedCode
 
         val fencedCode = CodeFencedGenerator.generate(text)
-        if (fencedCode != None) return fencedCode
+        if (fencedCode.isDefined) return fencedCode
 
         None
     }
@@ -32,7 +32,7 @@ object CodeTabbedGenerator extends Generator {
         if (lines.isEmpty) return None
 
         val content = lines.map(_._1.asInstanceOf[CodeLine].content).mkString("\n")
-        val totalLength = lines.map(_._2).foldLeft(0)(_ + _)
+        val totalLength = lines.map(_._2).sum
         Some((Code("", content), totalLength))
     }
 }
