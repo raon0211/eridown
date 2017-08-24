@@ -6,9 +6,10 @@ import in.suhj.eridown.elements.inline._
 
 object Constants {
     val eridownBlocks: List[Generator] = List(
+        CodeGenerator,
+        ThematicBreakGenerator,
         HeadingGenerator,
         BlockquoteGenerator,
-        CodeGenerator,
         ListGenerator,
         TableGenerator,
         DefinitionListGenerator,
