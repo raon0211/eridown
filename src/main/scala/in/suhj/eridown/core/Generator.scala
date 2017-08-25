@@ -42,16 +42,16 @@ abstract class Generator {
         val elements = new ListBuffer[ElementRange]()
         val scanner = Scanner(text)
 
-        while (!scanner.atEnd) {
-            @tailrec
-            def generate(generators: List[Generator]): Option[ElementRange] =
-                if (generators.isEmpty) None
-                else generators.head.generate(scanner.ahead) match {
-                    case Some((elem, length)) =>
-                        Some(ElementRange(elem, Range(scanner.position, scanner.position + length)))
-                    case None => generate(generators.tail)
-                }
+        @tailrec
+        def generate(generators: List[Generator]): Option[ElementRange] =
+            if (generators.isEmpty) None
+            else generators.head.generate(scanner.ahead) match {
+                case Some((elem, length)) =>
+                    Some(ElementRange(elem, Range(scanner.position, scanner.position + length)))
+                case None => generate(generators.tail)
+            }
 
+        while (!scanner.atEnd) {
             generate(generators) match {
                 case Some(elementRange) => {
                     elements += elementRange

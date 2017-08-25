@@ -14,6 +14,7 @@ object BlockquoteGenerator extends Generator {
 
     def generate(content: String): Option[ParseResult] = {
         val scanner = Scanner(content)
+        scanner.skipWhitespace()
 
         if (!scanner.reads(">")) None
         else {

@@ -247,7 +247,7 @@ Content extractors
 Methods to move the `position` front and back
 * `def skip(offset: Int): Unit`: add `offset` to `position`
 * `def skipWhitespace(): Unit`: skip whitespaces starting from `position`
-* `def skipLineEnd(): Unit`: skip line ends starting from `position`
+* `def skipLineEnd(): Unit`: skip *one* line end starting from `position`
 * `def skipToLineEnd(): Unit`: skip characters until it finds a line end. If no line end is found, move the `position` to `end`.
 * `def skipToNextLine(): Unit`: `skipToLineEnd()` then `skipLineEnd()`
 

@@ -40,7 +40,7 @@ class Test extends FunSuite {
               |* and
               |* lovely
             """.stripMargin.trim
-        ) === "<ul><li>Eriri</li><ul><li>is</li><ol><li>so</li></ol><li>cute</li></ul><li>and</li><li>lovely</li></ul>")
+        ) === "<ul><li>Eriri</li><li>is</li></ul><ol><li>so</li></ol><ul><li>cute</li><li>and</li><li>lovely</li></ul>")
     }
 
     test("Table 1") {

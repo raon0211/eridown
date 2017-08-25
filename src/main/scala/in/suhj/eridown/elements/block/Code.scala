@@ -42,22 +42,23 @@ object CodeTabbedLineGenerator extends Generator {
         val scanner = Scanner(text)
 
         var indent = 0
-        var done = false
-        while (indent < 4 && !done) {
+        var foundNotWhitespace = false
+        while (indent < 4 && !foundNotWhitespace) {
             if (scanner.currentChar == ' ') indent += 1
             else if (scanner.currentChar == '\t') indent += 4
-            else done = true
+            else foundNotWhitespace = true
 
             scanner.skip(1)
         }
 
-        if (done) return None
+        if (foundNotWhitespace) return None
 
         scanner.mark()
-        scanner.skipToNextLine()
-        val content = scanner.extract.trim
+        scanner.skipToLineEnd()
+        val content = scanner.extract
+        scanner.skipLineEnd()
 
-        if (content.nonEmpty) Some((CodeLine(content), scanner.position))
+        if (content.trim.nonEmpty) Some((CodeLine(content), scanner.position))
         else None
     }
 }

@@ -1,5 +1,7 @@
 package in.suhj.eridown.core
 
+import scala.collection.mutable
+
 class Scanner private (
     val buffer: String,
     var position: Int = 0,
@@ -12,7 +14,7 @@ class Scanner private (
         this(buffer, position, position, buffer.length)
     }
 
-    private var marker: Int = position
+    private var markerStack: List[Int] = Nil
 
     def text = buffer.substring(start, end)
     def ahead = buffer.substring(position)
@@ -33,10 +35,14 @@ class Scanner private (
     def reads(str: String) = ahead.startsWith(str)
     def readsAny(chars: Seq[Char]) = chars.exists(reads _)
 
-    def mark() = marker = position
-    def extract =
+    def mark() = markerStack = position :: markerStack
+    def extract = {
+        val marker = markerStack.head
+        markerStack = markerStack.tail
+
         if (marker <= position) buffer.substring(marker, position)
         else buffer.substring(position, marker)
+    }
     def extractIdentifier = {
         def atValidStart = Character.isLetter(currentChar) || reads('_')
         def atValidLetter = atValidStart || Character.isDigit(currentChar)
@@ -65,7 +71,7 @@ class Scanner private (
         }
     }
     def skipLineEnd() = {
-        while (isLineEnd(currentChar) & !atEnd) {
+        if (isLineEnd(currentChar) & !atEnd) {
             skip(1)
         }
     }
