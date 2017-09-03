@@ -1,90 +1,51 @@
 package in.suhj.eridown.core
 
+import in.suhj.eridown.elements.block.Blank
 import in.suhj.eridown.option.Option._
 import in.suhj.eridown.elements.inline._
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 
-case class Range(start: Int, end: Int)
-case class ElementRange(element: Element, range: Range)
-
 abstract class Generator {
-    type ParseResult = (Element, Int)
+    type GenerateResult = (Element, Int)
 
-    protected def generators: List[Generator] = inlines
-    protected def fillGenerator: Generator = TextGenerator
-    protected def skipToNext(scanner: Scanner) = scanner.skip(1)
+    def create(text: String): Option[Element] = {
+        var index = 0
+        var indent = 0
+        if (text.nonEmpty) {
+            while (index < text.length && Scanner.isWhitespace(text(index))) {
+                (text(index): @unchecked) match {
+                    case ' ' => indent += 1
+                    case '\t' => indent += 4
+                }
+                index += 1
+            }
+        }
 
-    protected def generate(text: String): Option[ParseResult]
+        generate(text) match {
+            case Some((elem, length)) => {
+                elem.indent = indent
+                elem.length = length
+                elem.rawText = text.substring(0, length).stripLineEnd
+                Some(elem)
+            }
+            case None => None
+        }
+    }
+    def generate(text: String): Option[GenerateResult]
 
-    protected final def getChildrenData(generator: Generator, text: String): List[ParseResult] = {
+    protected final def getChildrenData(generator: Generator, text: String): List[Element] = {
         @tailrec
-        def readChild(items: List[ParseResult], text: String): List[ParseResult] = {
-            generator.generate(text) match {
+        def readChild(items: List[Element], text: String): List[Element] = {
+            generator.create(text) match {
                 case None => items.reverse
-                case Some(valid @ (_, length)) => {
-                    readChild(valid :: items, text.substring(length))
+                case Some(elem) => {
+                    readChild(elem :: items, text.substring(elem.length))
                 }
             }
         }
 
         readChild(Nil, text)
-    }
-
-    protected final def transform(text: String): String = {
-        def fillRender(text: String) = (fillGenerator.generate(text): @unchecked) match {
-            case Some(result) => result._1.render
-        }
-
-        if (generators.isEmpty) return fillRender(text)
-
-        val elements = new ListBuffer[ElementRange]()
-        val scanner = Scanner(text)
-
-        @tailrec
-        def generate(generators: List[Generator]): Option[ElementRange] =
-            if (generators.isEmpty) None
-            else generators.head.generate(scanner.ahead) match {
-                case Some((elem, length)) =>
-                    Some(ElementRange(elem, Range(scanner.position, scanner.position + length)))
-                case None => generate(generators.tail)
-            }
-
-        while (!scanner.atEnd) {
-            generate(generators) match {
-                case Some(elementRange) => {
-                    elements += elementRange
-                    scanner.position = elementRange.range.end
-                }
-                case None => skipToNext(scanner)
-            }
-        }
-
-        if (elements.isEmpty) return fillRender(text)
-
-        var renders = new ListBuffer[String]
-        // For the sake of the last plain text to be processed
-        elements += ElementRange(Text(""), Range(text.length, text.length))
-
-        for {
-            i <- elements.indices
-            prev = i - 1
-        } {
-            val ElementRange(element, Range(start, _)) = elements(i)
-            val formerEnd =
-                if (prev < 0) 0
-                else elements(prev).range.end
-
-            val precedingText = text.substring(formerEnd, start)
-
-            if (precedingText.trim.nonEmpty) {
-                renders += fillRender(precedingText)
-            }
-
-            renders += element.render
-        }
-
-        renders.mkString
     }
 }

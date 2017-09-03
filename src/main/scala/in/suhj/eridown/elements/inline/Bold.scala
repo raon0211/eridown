@@ -8,7 +8,7 @@ case class Bold(text: String) extends Element {
 }
 
 object BoldGenerator extends Generator {
-    def generate(text: String): Option[ParseResult] = {
+    def generate(text: String): Option[GenerateResult] = {
         val scanner = Scanner(text)
 
         if (!scanner.reads("**")) return None
@@ -19,6 +19,6 @@ object BoldGenerator extends Generator {
         val content = scanner.extract
 
         if (content.isEmpty) None
-        else Some((Bold(transform(content)), scanner.position + 2))
+        else Some((Bold(InlineTransformer.transform(content)), scanner.position + 2))
     }
 }

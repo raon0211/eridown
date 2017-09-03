@@ -44,7 +44,7 @@ case class TableData(text: String, alignment: TableDataAlignment, isHeader: Bool
 }
 
 object TableGenerator extends Generator {
-    def generate(text: String): Option[ParseResult] = {
+    def generate(text: String): Option[GenerateResult] = {
         val result = getChildrenData(TableRowGenerator, text)
         if (result.isEmpty) return None
 
@@ -52,10 +52,8 @@ object TableGenerator extends Generator {
         var totalOffset = 0
 
         for (res <- result) {
-            val (element, length) = res
-
-            rows += element.asInstanceOf[TableRow]
-            totalOffset += length
+            rows += res.asInstanceOf[TableRow]
+            totalOffset += res.length
         }
 
         def setSpans(rows: ListBuffer[TableRow]): List[TableRow] = {
@@ -101,8 +99,8 @@ object TableGenerator extends Generator {
 }
 
 object TableRowGenerator extends Generator {
-    def generate(text: String): Option[ParseResult] = {
-        val result = getChildrenData(TableDataGenerator, text).map(_._1.asInstanceOf[TableData])
+    def generate(text: String): Option[GenerateResult] = {
+        val result = getChildrenData(TableDataGenerator, text).map(_.asInstanceOf[TableData])
         if (result.isEmpty) return None
 
         Some((TableRow(new ListBuffer[TableData] ++= result), text.indexOf('\n') + 1))
@@ -110,7 +108,7 @@ object TableRowGenerator extends Generator {
 }
 
 object TableDataGenerator extends Generator {
-    def generate(text: String): Option[ParseResult] = {
+    def generate(text: String): Option[GenerateResult] = {
         import TableDataAlignment._
 
         val scanner = Scanner(text)
@@ -144,6 +142,6 @@ object TableDataGenerator extends Generator {
             else if (leadingSpaces >= 2) Right
             else Left
 
-        Option((TableData(scanner.extract, alignment, delim == '^'), scanner.position + trailingSpaces))
+        Some((TableData(scanner.extract, alignment, delim == '^'), scanner.position + trailingSpaces))
     }
 }

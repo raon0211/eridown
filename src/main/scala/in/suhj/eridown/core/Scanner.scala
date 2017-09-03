@@ -18,6 +18,18 @@ class Scanner private (
 
     def text = buffer.substring(start, end)
     def ahead = buffer.substring(position)
+    def aheadLine = {
+        val pos = position
+
+        mark()
+        while (!atLineEnd) {
+            skip(1)
+        }
+        val line = extract
+
+        position = pos
+        line
+    }
 
     def currentChar: Char = charAt(0)
     def charAt(offset: Int): Char = {
@@ -43,6 +55,7 @@ class Scanner private (
         if (marker <= position) buffer.substring(marker, position)
         else buffer.substring(position, marker)
     }
+
     def extractIdentifier = {
         def atValidStart = Character.isLetter(currentChar) || reads('_')
         def atValidLetter = atValidStart || Character.isDigit(currentChar)
@@ -99,10 +112,16 @@ class Scanner private (
 
         if (index >= start && index < end) {
             position = index
-            return true
-        }
+            true
+        } else false
+    }
+    def findAny(chars: Seq[Char]): Boolean = {
+        val index = seekAny(chars)
 
-        return false
+        if (index >= start && index < end) {
+            position += index
+            true
+        } else false
     }
 }
 
@@ -110,6 +129,26 @@ object Scanner {
     def apply(buffer: String) = new Scanner(buffer, 0)
     def apply(buffer: String, start: Int) = new Scanner(buffer, start)
     def apply(buffer: String, start: Int, end: Int) = new Scanner(buffer, start, start, end)
+
+    def stripLeft(str: String, indent: Int): String = {
+        str.split("\n", -1).map {
+            str => {
+                if (str.isEmpty) return ""
+
+                var index = 0
+                var currIndent = 0
+                while (isWhitespace(str(index)) && currIndent < indent) {
+                    str(index) match {
+                        case ' ' => currIndent += 1
+                        case '\t' => currIndent += 4
+                    }
+                    index += 1
+                }
+
+                str.substring(index)
+            }
+        }.mkString("\n")
+    }
 
     def isLineEnd(char: Char) = char == '\n' || char == '\r' || char == '\0'
     def isWhitespace(char: Char) = char == ' ' || char == '\t'

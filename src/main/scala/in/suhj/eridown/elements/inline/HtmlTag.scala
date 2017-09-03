@@ -11,7 +11,7 @@ abstract class HtmlTagGenerator extends Generator {
     protected val allowedTags: Set[String]
     protected val allowedAttributes: Map[String, List[String]]
 
-    def generate(text: String): Option[ParseResult] = {
+    def generate(text: String): Option[GenerateResult] = {
         val scanner = Scanner(text)
 
         if (!scanner.reads('<')) return None

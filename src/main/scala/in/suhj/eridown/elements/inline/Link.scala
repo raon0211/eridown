@@ -10,7 +10,7 @@ case class Link(content: String, link: String) extends Element {
 }
 
 object LinkGenerator extends Generator {
-    def generate(text: String): Option[ParseResult] = {
+    def generate(text: String): Option[GenerateResult] = {
         val scanner = Scanner(text)
 
         if (!scanner.reads('[')) return None
@@ -29,6 +29,6 @@ object LinkGenerator extends Generator {
         val link = scanner.extract
         scanner.skip(1)
 
-        Some((Link(transform(content), link), scanner.position))
+        Some((Link(InlineTransformer.transform(content), link), scanner.position))
     }
 }

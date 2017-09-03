@@ -7,7 +7,7 @@ case class ThematicBreak() extends Element {
 }
 
 object ThematicBreakGenerator extends Generator {
-    def generate(text: String): Option[ParseResult] = {
+    def generate(text: String): Option[GenerateResult] = {
         val scanner = Scanner(text)
         scanner.skipWhitespace()
         scanner.mark()

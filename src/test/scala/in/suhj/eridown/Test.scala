@@ -17,8 +17,7 @@ class Test extends FunSuite {
               |```scala
               |println("Hello, world!")
               |```
-            """.stripMargin.trim) == """<pre class="lang-scala"><code>println(&quot;Hello, world!&quot;)
-                                      |</code></pre>""".stripMargin.trim.replaceAll("(\\s|\\r|\\n){2,}", ""))
+            """.stripMargin.trim) == """<pre class="language-scala"><code>println(&quot;Hello, world!&quot;)</code></pre>""".stripMargin.trim.replaceAll("(\\s|\\r|\\n){2,}", ""))
     }
 
     test("Code 2") {

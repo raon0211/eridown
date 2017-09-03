@@ -8,7 +8,7 @@ case class Emphasis(text: String) extends Element {
 }
 
 object EmphasisGenerator extends Generator {
-    def generate(text: String): Option[ParseResult] = {
+    def generate(text: String): Option[GenerateResult] = {
         val scanner = Scanner(text)
 
         if (!scanner.reads('*')) return None
@@ -19,6 +19,6 @@ object EmphasisGenerator extends Generator {
         val content = scanner.extract
 
         if (content.isEmpty) None
-        else Some((Emphasis(transform(content)), scanner.position + 1))
+        else Some((Emphasis(InlineTransformer.transform(content)), scanner.position + 1))
     }
 }

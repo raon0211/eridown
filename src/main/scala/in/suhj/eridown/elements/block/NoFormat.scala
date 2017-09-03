@@ -10,7 +10,7 @@ case class NoFormat(text: String) extends Element {
 }
 
 object NoFormatGenerator extends Generator {
-    def generate(content: String): Option[ParseResult] = {
+    def generate(content: String): Option[GenerateResult] = {
         val scanner = Scanner(content)
 
         if (!scanner.reads("%%%")) return None

@@ -10,7 +10,7 @@ case class Strike(text: String) extends Element {
 }
 
 object StrikeGenerator extends Generator {
-    def generate(text: String): Option[ParseResult] = {
+    def generate(text: String): Option[GenerateResult] = {
         val scanner = Scanner(text)
 
         if (!scanner.reads("~~")) return None
@@ -21,6 +21,6 @@ object StrikeGenerator extends Generator {
         val content = scanner.extract
 
         if (content.isEmpty) None
-        else Some((Strike(transform(content)), scanner.position + 2))
+        else Some((Strike(InlineTransformer.transform(content)), scanner.position + 2))
     }
 }

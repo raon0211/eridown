@@ -8,7 +8,7 @@ case class CodeInline(text: String) extends Element {
 }
 
 object CodeInlineGenerator extends Generator {
-    def generate(text: String): Option[ParseResult] = {
+    def generate(text: String): Option[GenerateResult] = {
         val scanner = Scanner(text)
 
         if (!scanner.reads("`")) return None
