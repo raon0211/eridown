@@ -81,7 +81,7 @@ case class Paragraph(
             def canInterrupt(item: ListItem) =
                 if (item.text.trim.isEmpty) false
                 else if (item.startNum == 1) true
-                else if (item.delim == '*' || item.delim == '-' && item.delim == '+') true
+                else if (item.delim == '*' || item.delim == '-' || item.delim == '+') true
                 else false
 
             targets(index) match {

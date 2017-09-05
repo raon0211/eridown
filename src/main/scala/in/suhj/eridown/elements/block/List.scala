@@ -69,58 +69,62 @@ case class ListItem(
 
     override def integrate(targets: List[Element]): (Element, Int) = {
         var canIntegrate = true
-        var integratedIndex = 0
+        var index = 0
 
         val items = new ListBuffer[ListItem] += this
+        var itemAdding = true
 
-        while (canIntegrate && integratedIndex < targets.length) {
-            def addLineToItem(elem: Element) = {
-                val prevTarget: Element =
-                    if (integratedIndex == 0) this
-                    else targets(integratedIndex - 1)
+        while (canIntegrate && index < targets.length) {
+            val prevTarget: Element =
+                if (index == 0) this
+                else targets(index - 1)
+            val target = targets(index)
 
-                val isValid: Boolean = elem.indent >= textStart
-                val text: String = Scanner.stripLeft(elem.rawText, textStart)
+            val isListItem = target.isInstanceOf[ListItem]
+            val isBlank = target.isInstanceOf[Blank]
+            val isIndentSufficient = target.indent >= textStart
 
-                prevTarget match {
-                    case _: Blank => {
-                        if (isValid) {
-                            tight = false
-                            addTextToItem(text)
-                        } else canIntegrate = false
-                    }
-                    case _ => addTextToItem(text)
+            val prevIsBlank = prevTarget.isInstanceOf[Blank]
+
+            def canContinue = {
+                if (prevIsBlank) isListItem || isBlank || isIndentSufficient
+                else target match {
+                    case item: ListItem => delim == item.delim
+                    case _: Blank => items.last.text.trim.nonEmpty
+                    case _: TextLine => true
+                    case _ => isIndentSufficient
                 }
             }
 
-            def addTextToItem(text: String) = {
-                items.last.text = items.last.text + "\n" + text
-                integratedIndex += 1
-            }
+            if (canContinue) {
+                val text: String = Scanner.stripLeft(target.rawText, textStart)
 
-            targets(integratedIndex) match {
-                case item: ListItem => {
-                    if (delim != item.delim) {
-                        return (ListElement(items, tight), integratedIndex + 1)
-                    } else if (items.last.textStart <= item.indent) {
-                        addTextToItem(item.rawText)
-                    } else {
+                target match {
+                    case item: ListItem if items.last.textStart <= item.indent => {
+                        itemAdding = false
+                        addTextToItem(text)
+                    }
+                    case item: ListItem => {
+                        if (tight) tight = !prevIsBlank
+                        itemAdding = true
                         items += item
-                        integratedIndex += 1
+                        index += 1
+                    }
+                    case _: Blank => addTextToItem(text)
+                    case line => {
+                        if (tight && itemAdding) tight = !prevIsBlank
+                        addTextToItem(text)
                     }
                 }
-                case _: Blank => {
-                    if (items.last.text.trim.isEmpty) {
-                        canIntegrate = false
-                    } else {
-                        addTextToItem("")
-                    }
+
+                def addTextToItem(text: String) = {
+                    items.last.text = items.last.text + "\n" + text
+                    index += 1
                 }
-                case elem => addLineToItem(elem)
-            }
+            } else canIntegrate = false
         }
 
-        (ListElement(items, tight), integratedIndex + 1)
+        (ListElement(items, tight), index + 1)
     }
 }
 

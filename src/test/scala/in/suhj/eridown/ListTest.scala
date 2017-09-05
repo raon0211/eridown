@@ -3,120 +3,120 @@ package in.suhj.eridown
 import org.scalatest.FunSuite
 
 class ListTest extends FunSuite {
-        test("A paragraph\nwith two lines.\n\n    indented code\n\n> A block quote.") {
-            assert(Parser.render("""A paragraph
-                                   |with two lines.
-                                   |
-                                   |    indented code
-                                   |
-                                   |> A block quote.""".stripMargin.trim) ==
-                """<p>A paragraph
-                  |with two lines.</p><pre><code>indented code</code></pre><blockquote><p>A block quote.</p></blockquote>""".stripMargin.trim)
-        }
+    test("A paragraph\nwith two lines.\n\n    indented code\n\n> A block quote.") {
+        assert(Parser.render("""A paragraph
+                               |with two lines.
+                               |
+                               |    indented code
+                               |
+                               |> A block quote.""".stripMargin.trim) ==
+            """<p>A paragraph
+              |with two lines.</p><pre><code>indented code</code></pre><blockquote><p>A block quote.</p></blockquote>""".stripMargin.trim)
+    }
 
-        test("1.  A paragraph\n    with two lines.\n\n        indented code\n\n    > A block quote.") {
-            assert(Parser.render("""1.  A paragraph
-                                   |    with two lines.
-                                   |
-                                   |        indented code
-                                   |
-                                   |    > A block quote.""".stripMargin.trim) ==
-                """<ol><li><p>A paragraph
-                  |with two lines.</p><pre><code>indented code</code></pre><blockquote><p>A block quote.</p></blockquote></li></ol>""".stripMargin.trim)
-        }
+    test("1.  A paragraph\n    with two lines.\n\n        indented code\n\n    > A block quote.") {
+        assert(Parser.render("""1.  A paragraph
+                               |    with two lines.
+                               |
+                               |        indented code
+                               |
+                               |    > A block quote.""".stripMargin.trim) ==
+            """<ol><li><p>A paragraph
+              |with two lines.</p><pre><code>indented code</code></pre><blockquote><p>A block quote.</p></blockquote></li></ol>""".stripMargin.trim)
+    }
 
-        test("- one\n\n two") {
-            assert(Parser.render("- one\n\n two") == "<ul><li>one</li></ul><p>two</p>")
-        }
+    test("- one\n\n two") {
+        assert(Parser.render("- one\n\n two") == "<ul><li>one</li></ul><p>two</p>")
+    }
 
-        test("- one\n\n  two") {
-            assert(Parser.render("- one\n\n  two") == "<ul><li><p>one</p><p>two</p></li></ul>")
-        }
+    test("- one\n\n  two") {
+        assert(Parser.render("- one\n\n  two") == "<ul><li><p>one</p><p>two</p></li></ul>")
+    }
 
-        test(" -    one\n\n     two") {
-            assert(Parser.render(" -    one\n\n     two") == "<ul><li>one</li></ul><pre><code> two</code></pre>")
-        }
+    test(" -    one\n\n     two") {
+        assert(Parser.render(" -    one\n\n     two") == "<ul><li>one</li></ul><pre><code> two</code></pre>")
+    }
 
-        test(" -    one\n\n      two") {
-            assert(Parser.render(" -    one\n\n      two") == "<ul><li><p>one</p><p>two</p></li></ul>")
-        }
+    test(" -    one\n\n      two") {
+        assert(Parser.render(" -    one\n\n      two") == "<ul><li><p>one</p><p>two</p></li></ul>")
+    }
 
-        test("   > > 1.  one\n>>\n>>     two") {
-            assert(Parser.render("   > > 1.  one\n>>\n>>     two") == "<blockquote><blockquote><ol><li><p>one</p><p>two</p></li></ol></blockquote></blockquote>")
-        }
+    test("   > > 1.  one\n>>\n>>     two") {
+        assert(Parser.render("   > > 1.  one\n>>\n>>     two") == "<blockquote><blockquote><ol><li><p>one</p><p>two</p></li></ol></blockquote></blockquote>")
+    }
 
-        test(">>- one\n>>\n  >  > two") {
-            assert(Parser.render(">>- one\n>>\n  >  > two") == "<blockquote><blockquote><ul><li>one</li></ul><p>two</p></blockquote></blockquote>")
-        }
+    test(">>- one\n>>\n  >  > two") {
+        assert(Parser.render(">>- one\n>>\n  >  > two") == "<blockquote><blockquote><ul><li>one</li></ul><p>two</p></blockquote></blockquote>")
+    }
 
-        test("-one\n\n2.two") {
-            assert(Parser.render("-one\n\n2.two") == "<p>-one</p><p>2.two</p>")
-        }
+    test("-one\n\n2.two") {
+        assert(Parser.render("-one\n\n2.two") == "<p>-one</p><p>2.two</p>")
+    }
 
-        test("- foo\n\n\n  bar") {
-            assert(Parser.render("- foo\n\n\n  bar") == "<ul><li><p>foo</p><p>bar</p></li></ul>")
-        }
+    test("- foo\n\n\n  bar") {
+        assert(Parser.render("- foo\n\n\n  bar") == "<ul><li><p>foo</p><p>bar</p></li></ul>")
+    }
 
-        test("1.  foo\n\n    ```\n    bar\n    ```\n\n    baz\n\n    > bam") {
-            assert(Parser.render("1.  foo\n\n    ```\n    bar\n    ```\n\n    baz\n\n    > bam") ==
-                "<ol><li><p>foo</p><pre><code>bar</code></pre><p>baz</p><blockquote><p>bam</p></blockquote></li></ol>")
-        }
+    test("1.  foo\n\n    ```\n    bar\n    ```\n\n    baz\n\n    > bam") {
+        assert(Parser.render("1.  foo\n\n    ```\n    bar\n    ```\n\n    baz\n\n    > bam") ==
+            "<ol><li><p>foo</p><pre><code>bar</code></pre><p>baz</p><blockquote><p>bam</p></blockquote></li></ol>")
+    }
 
-        test("- Foo\n\n      bar\n\n\n      baz") {
-            assert(Parser.render("- Foo\n\n      bar\n\n\n      baz") ==
-                "<ul><li><p>Foo</p><pre><code>bar\n\n\nbaz</code></pre></li></ul>")
-        }
+    test("- Foo\n\n      bar\n\n\n      baz") {
+        assert(Parser.render("- Foo\n\n      bar\n\n\n      baz") ==
+            "<ul><li><p>Foo</p><pre><code>bar\n\n\nbaz</code></pre></li></ul>")
+    }
 
-        test("123456789. ok") {
-            assert(Parser.render("123456789. ok") ==
-                "<ol start=\"123456789\"><li>ok</li></ol>")
-        }
+    test("123456789. ok") {
+        assert(Parser.render("123456789. ok") ==
+            "<ol start=\"123456789\"><li>ok</li></ol>")
+    }
 
-        test("1234567890. not ok") {
-            assert(Parser.render("1234567890. not ok") ==
-                "<p>1234567890. not ok</p>")
-        }
+    test("1234567890. not ok") {
+        assert(Parser.render("1234567890. not ok") ==
+            "<p>1234567890. not ok</p>")
+    }
 
-        test("0. ok") {
-            assert(Parser.render("0. ok") == "<ol start=\"0\"><li>ok</li></ol>")
-        }
+    test("0. ok") {
+        assert(Parser.render("0. ok") == "<ol start=\"0\"><li>ok</li></ol>")
+    }
 
-        test("003. ok") {
-            assert(Parser.render("003. ok") == "<ol start=\"3\"><li>ok</li></ol>")
-        }
+    test("003. ok") {
+        assert(Parser.render("003. ok") == "<ol start=\"3\"><li>ok</li></ol>")
+    }
 
-        test("-1. not ok") {
-            assert(Parser.render("-1. not ok") == "<p>-1. not ok</p>")
-        }
+    test("-1. not ok") {
+        assert(Parser.render("-1. not ok") == "<p>-1. not ok</p>")
+    }
 
-        test("- foo\n\n      bar") {
-            assert(Parser.render("- foo\n\n      bar") == "<ul><li><p>foo</p><pre><code>bar</code></pre></li></ul>")
-        }
+    test("- foo\n\n      bar") {
+        assert(Parser.render("- foo\n\n      bar") == "<ul><li><p>foo</p><pre><code>bar</code></pre></li></ul>")
+    }
 
-        test("  10.  foo\n\n           bar") {
-            assert(Parser.render("  10.  foo\n\n           bar") == "<ol start=\"10\"><li><p>foo</p><pre><code>bar</code></pre></li></ol>")
-        }
+    test("  10.  foo\n\n           bar") {
+        assert(Parser.render("  10.  foo\n\n           bar") == "<ol start=\"10\"><li><p>foo</p><pre><code>bar</code></pre></li></ol>")
+    }
 
-        test("    indented code\n\nparagraph\n\n    more code") {
-            assert(Parser.render("    indented code\n\nparagraph\n\n    more code") == "<pre><code>indented code</code></pre><p>paragraph</p><pre><code>more code</code></pre>")
-        }
+    test("    indented code\n\nparagraph\n\n    more code") {
+        assert(Parser.render("    indented code\n\nparagraph\n\n    more code") == "<pre><code>indented code</code></pre><p>paragraph</p><pre><code>more code</code></pre>")
+    }
 
-        test("1.      indented code\n\n   paragraph\n\n       more code") {
-            assert(Parser.render("1.      indented code\n\n   paragraph\n\n       more code") ==
-                "<ol><li><pre><code> indented code</code></pre><p>paragraph</p><pre><code>more code</code></pre></li></ol>")
-        }
+    test("1.      indented code\n\n   paragraph\n\n       more code") {
+        assert(Parser.render("1.      indented code\n\n   paragraph\n\n       more code") ==
+            "<ol><li><pre><code> indented code</code></pre><p>paragraph</p><pre><code>more code</code></pre></li></ol>")
+    }
 
-        test("   foo\n\nbar") {
-            assert(Parser.render("   foo\n\nbar") == "<p>foo</p><p>bar</p>")
-        }
+    test("   foo\n\nbar") {
+        assert(Parser.render("   foo\n\nbar") == "<p>foo</p><p>bar</p>")
+    }
 
-        test("-    foo\n\n  bar") {
-            assert(Parser.render("-    foo\n\n  bar") == "<ul><li>foo</li></ul><p>bar</p>")
-        }
+    test("-    foo\n\n  bar") {
+        assert(Parser.render("-    foo\n\n  bar") == "<ul><li>foo</li></ul><p>bar</p>")
+    }
 
-        test("-  foo\n\n   bar") {
-            assert(Parser.render("-  foo\n\n   bar") == "<ul><li><p>foo</p><p>bar</p></li></ul>")
-        }
+    test("-  foo\n\n   bar") {
+        assert(Parser.render("-  foo\n\n   bar") == "<ul><li><p>foo</p><p>bar</p></li></ul>")
+    }
 
     test("-\n  foo\n-\n  ```\n  bar\n  ```\n-\n      baz") {
         assert(Parser.render("-\n  foo\n-\n  ```\n  bar\n  ```\n-\n      baz") ==
@@ -191,5 +191,80 @@ class ListTest extends FunSuite {
     test("> 1. > Blockquote\ncontinued here.") {
         assert(Parser.render("> 1. > Blockquote\ncontinued here.")
             == "<blockquote><ol><li><blockquote><p>Blockquote\ncontinued here.</p></blockquote></li></ol></blockquote>")
+    }
+
+    test("> 1. > Blockquote\n> continued here.") {
+        assert(Parser.render("> 1. > Blockquote\n> continued here.")
+            == "<blockquote><ol><li><blockquote><p>Blockquote\ncontinued here.</p></blockquote></li></ol></blockquote>")
+    }
+
+    test("- foo\n  - bar\n    - baz\n      - boo") {
+        assert(Parser.render("- foo\n  - bar\n    - baz\n      - boo")
+            == "<ul><li>foo<ul><li>bar<ul><li>baz<ul><li>boo</li></ul></li></ul></li></ul></li></ul>")
+    }
+
+    test("- foo\n - bar\n  - baz\n   - boo") {
+        assert(Parser.render("- foo\n - bar\n  - baz\n   - boo")
+            == "<ul><li>foo</li><li>bar</li><li>baz</li><li>boo</li></ul>")
+    }
+
+    test("10) foo\n    - bar") {
+        assert(Parser.render("10) foo\n    - bar")
+            == "<ol start=\"10\"><li>foo<ul><li>bar</li></ul></li></ol>")
+    }
+
+    test("10) foo\n   - bar") {
+        assert(Parser.render("10) foo\n   - bar")
+            == "<ol start=\"10\"><li>foo</li></ol><ul><li>bar</li></ul>")
+    }
+
+    test("- - foo") {
+        assert(Parser.render("- - foo")
+            == "<ul><li><ul><li>foo</li></ul></li></ul>")
+    }
+
+    test("1. - 2. foo") {
+        assert(Parser.render("1. - 2. foo")
+            == "<ol><li><ul><li><ol start=\"2\"><li>foo</li></ol></li></ul></li></ol>")
+    }
+
+    test("- # Foo\n- Bar\n  ---\n  baz") {
+        assert(Parser.render("- # Foo\n- Bar\n  ---\n  baz")
+            == "<ul>\n<li>\n<h1>Foo</h1>\n</li>\n<li>\n<h2>Bar</h2>\nbaz</li>\n</ul>")
+    }
+
+    test("- foo\n- bar\n+ baz") {
+        assert(Parser.render("- foo\n- bar\n+ baz")
+            == "<ul><li>foo</li><li>bar</li></ul><ul><li>baz</li></ul>")
+    }
+
+    test("1. foo\n2. bar\n3) baz") {
+        assert(Parser.render("1. foo\n2. bar\n3) baz")
+            == "<ol><li>foo</li><li>bar</li></ol><ol start=\"3\"><li>baz</li></ol>")
+    }
+
+    test("Foo\n- bar\n- baz") {
+        assert(Parser.render("Foo\n- bar\n- baz")
+            == "<p>Foo</p><ul><li>bar</li><li>baz</li></ul>")
+    }
+
+    test("The number of windows in my house is\n14.  The number of doors is 6.") {
+        assert(Parser.render("The number of windows in my house is\n14.  The number of doors is 6.")
+            == "<p>The number of windows in my house is\n14.  The number of doors is 6.</p>")
+    }
+
+    test("The number of windows in my house is\n1.  The number of doors is 6.") {
+        assert(Parser.render("The number of windows in my house is\n1.  The number of doors is 6.")
+            == "<p>The number of windows in my house is</p><ol><li>The number of doors is 6.</li></ol>")
+    }
+
+    test("- foo\n\n- bar\n\n\n- baz") {
+        assert(Parser.render("- foo\n\n- bar\n\n\n- baz")
+            == "<ul><li><p>foo</p></li><li><p>bar</p></li><li><p>baz</p></li></ul>")
+    }
+
+    test("- foo\n  - bar\n    - baz\n\n\n      bim") {
+        assert(Parser.render("- foo\n  - bar\n    - baz\n\n\n      bim")
+            == "<ul><li>foo<ul><li>bar<ul><li><p>baz</p><p>bim</p></li></ul></li></ul></li></ul>")
     }
 }
