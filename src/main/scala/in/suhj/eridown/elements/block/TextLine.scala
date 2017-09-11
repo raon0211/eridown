@@ -6,38 +6,38 @@ import in.suhj.eridown.option.Option.blocks
 import scala.collection.mutable.ListBuffer
 
 abstract class TextLine(
-    val content: String
+    val text: String
 )  extends Element {
-    def render = text
+    def render = content
 
-    def text = trimLeft(4)
+    def content = trimLeft(4)
     def trimLeft(characters: Int): String = {
-        if (content.isEmpty) return ""
+        if (text.isEmpty) return ""
 
         var index = 0
         var indent = 0
 
         while (indent < characters) {
-            val currentChar = content(index)
+            val currentChar = text(index)
             val skip =
                 if (currentChar == ' ') 1
                 else if (currentChar == '\t') 4
                 else 0
 
-            if (skip == 0) return content.substring(index)
+            if (skip == 0) return text.substring(index)
 
             indent += skip
             index += 1
         }
 
-        content.substring(index)
+        text.substring(index)
     }
     val isCode: Boolean = indent >= 4
 }
 
 case class CodeLine(
-   override val content: String
-) extends TextLine(content) {
+   override val text: String
+) extends TextLine(text) {
     override def integrate(targets: List[Element]): IntegrateResult = {
         var canIntegrate = true
         var index = 0
@@ -64,29 +64,29 @@ case class CodeLine(
 }
 
 case class Paragraph(
-    override val content: String,
-    val tight: Boolean
-) extends TextLine(content) {
+                        override val text: String,
+                        val tight: Boolean
+) extends TextLine(text) {
     override def render =
-        if (tight) InlineTransformer.transform(content.trim)
-        else s"<p>${InlineTransformer.transform(content.trim)}</p>"
+        if (tight) InlineTransformer.transform(text.trim)
+        else s"<p>${InlineTransformer.transform(text.trim)}</p>"
 
     override def integrate(targets: List[Element]): IntegrateResult = {
         var canIntegrate = true
         var index = 0
 
-        var content = new ListBuffer[String] += this.content
+        var content = new ListBuffer[String] += this.text
 
         while (canIntegrate && index < targets.length) {
             def canInterrupt(item: ListItem) =
-                if (item.text.trim.isEmpty) false
+                if (item.content.trim.isEmpty) false
                 else if (item.startNum == 1) true
                 else if (item.delim == '*' || item.delim == '-' || item.delim == '+') true
                 else false
 
             targets(index) match {
                 case line: TextLine => {
-                    content += line.text
+                    content += line.content
                     index += 1
                 }
                 case item: ListItem => {

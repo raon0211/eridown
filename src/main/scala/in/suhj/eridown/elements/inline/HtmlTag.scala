@@ -3,7 +3,7 @@ package in.suhj.eridown.elements.inline
 import in.suhj.eridown._
 import in.suhj.eridown.core._
 
-case class HtmlTag(content: String) extends Element {
+case class HtmlTag(name: String, content: String) extends Element {
     def render: String = content
 }
 
@@ -20,7 +20,7 @@ abstract class HtmlTagGenerator extends Generator {
         if (scanner.reads("!--")) {
             if (scanner.find("-->")) {
                 val endIndex = scanner.position + 3
-                return Some((HtmlTag(text.substring(0, endIndex)), endIndex))
+                return Some((HtmlTag("!", text.substring(0, endIndex)), endIndex))
             } else return None
         }
 
@@ -34,9 +34,9 @@ abstract class HtmlTagGenerator extends Generator {
             scanner.skipWhitespace()
 
             if (scanner.reads("/>"))
-                return Some((HtmlTag(text.substring(0, scanner.position + 2)), scanner.position + 2))
+                return Some((HtmlTag(name, text.substring(0, scanner.position + 2)), scanner.position + 2))
             if (scanner.reads('>'))
-                return Some((HtmlTag(text.substring(0, scanner.position + 1)), scanner.position + 1))
+                return Some((HtmlTag(name, text.substring(0, scanner.position + 1)), scanner.position + 1))
 
             val key = scanner.extractIdentifier
             if (!allowedAttributes(name).contains(key)) return None
@@ -87,4 +87,9 @@ object DefaultHtmlTagGenerator extends HtmlTagGenerator {
         "img" -> List("src", "width", "height", "alt", "title", "class"),
         "div" -> List("class")
     )
+}
+
+object HtmlCommentBlockGenerator extends HtmlTagGenerator {
+    override val allowedTags = Set()
+    override val allowedAttributes = Map()
 }

@@ -33,7 +33,7 @@ abstract class Generator {
             case None => None
         }
     }
-    def generate(text: String): Option[GenerateResult]
+    protected def generate(text: String): Option[GenerateResult]
 
     protected final def getChildrenData(generator: Generator, text: String): List[Element] = {
         @tailrec

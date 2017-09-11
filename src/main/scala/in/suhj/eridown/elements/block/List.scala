@@ -3,7 +3,7 @@ package in.suhj.eridown.elements.block
 import in.suhj.eridown._
 import in.suhj.eridown.core._
 import in.suhj.eridown.elements.block.ParagraphGenerator.getIndent
-import in.suhj.eridown.elements.inline.TextGenerator
+import in.suhj.eridown.elements.inline.{HtmlTag, TextGenerator}
 import in.suhj.eridown.option.Option._
 
 import scala.collection.mutable
@@ -19,10 +19,10 @@ case class ListElement(children: ListBuffer[ListItem], tight: Boolean) extends E
         val start = if (startNum >= 0 && startNum != 1) s""" start="$startNum"""" else ""
 
         s"<$element$start>" +
-            s"${children.map(
+            children.map(
                 if (tight) _.tightRender
                 else _.looseRender
-            ).mkString}" +
+            ).mkString +
         s"</$element>"
     }
 }
@@ -49,35 +49,40 @@ case class ListItem(
     startNum: Int,
     delim: Char
 ) extends Element {
-    private var tight = true
+    var children: List[Element] = Nil
+    def looseChildren = children.map {
+        case Paragraph(text, true) => Paragraph(text, false)
+        case child => child
+    }
 
-    def text =
+    def content =
         if (rawText.length >= textStart)
             rawText.substring(
                 Math.min(rawText.length, textStart)
             )
         else ""
-    def text_=(newText: String) =
+    def content_=(newText: String) =
         rawText = rawText.substring(0,
             Math.min(rawText.length, textStart)
         ) + newText
 
     def render = tightRender
 
-    def looseRender = s"<li>${BlockTransformer.transform(text)}</li>"
-    def tightRender = s"<li>${TightTransformer.transform(text)}</li>"
+    def looseRender = s"<li>${looseChildren.map(_.render).mkString}</li>"
+    def tightRender = s"<li>${children.map(_.render).mkString}</li>"
 
     override def integrate(targets: List[Element]): (Element, Int) = {
         var canIntegrate = true
         var index = 0
 
         val items = new ListBuffer[ListItem] += this
-        var itemAdding = true
+        var tight = true
+
+        def prevTarget: Element =
+            if (index == 0) this
+            else targets(index - 1)
 
         while (canIntegrate && index < targets.length) {
-            val prevTarget: Element =
-                if (index == 0) this
-                else targets(index - 1)
             val target = targets(index)
 
             val isListItem = target.isInstanceOf[ListItem]
@@ -87,10 +92,15 @@ case class ListItem(
             val prevIsBlank = prevTarget.isInstanceOf[Blank]
 
             def canContinue = {
-                if (prevIsBlank) isListItem || isBlank || isIndentSufficient
+                if (prevIsBlank)
+                    if (isListItem) {
+                        tight = false
+                        true
+                    }
+                    else isBlank || (items.last.content.trim.nonEmpty && isIndentSufficient)
                 else target match {
                     case item: ListItem => delim == item.delim
-                    case _: Blank => items.last.text.trim.nonEmpty
+                    case _: Blank => true
                     case _: TextLine => true
                     case _ => isIndentSufficient
                 }
@@ -100,36 +110,54 @@ case class ListItem(
                 val text: String = Scanner.stripLeft(target.rawText, textStart)
 
                 target match {
-                    case item: ListItem if items.last.textStart <= item.indent => {
-                        itemAdding = false
+                    case item: ListItem if items.last.textStart <= item.indent =>
                         addTextToItem(text)
-                    }
-                    case item: ListItem => {
-                        if (tight) tight = !prevIsBlank
-                        itemAdding = true
-                        items += item
-                        index += 1
-                    }
+                    case item: ListItem => addItemToList(item)
+                    case line: CodeLine if items.last.textStart > line.indent =>
+                        ListItemGenerator.create(line.text) match {
+                            case Some(item) => addItemToList(item.asInstanceOf[ListItem])
+                            case None => addTextToItem(text)
+                        }
                     case _: Blank => addTextToItem(text)
-                    case line => {
-                        if (tight && itemAdding) tight = !prevIsBlank
-                        addTextToItem(text)
-                    }
+                    case _ => addTextToItem(text)
+                }
+
+                def addItemToList(item: ListItem): Unit = {
+                    items += item
+                    index += 1
                 }
 
                 def addTextToItem(text: String) = {
-                    items.last.text = items.last.text + "\n" + text
+                    items.last.content = items.last.content + "\n" + text
                     index += 1
                 }
             } else canIntegrate = false
         }
+
+        for (item <- items) {
+            val children = TightTransformer.parse(item.content)
+
+            if (tight) {
+                val blanksBetween = children
+                    .dropWhile(_.isInstanceOf[Blank])
+                    .reverse.dropWhile(_.isInstanceOf[Blank]).reverse
+                    .filter(_.isInstanceOf[Blank])
+
+                if (blanksBetween.nonEmpty) tight = false
+            }
+
+            item.children = children
+            item
+        }
+
+        if (prevTarget.isInstanceOf[Blank]) index -= 1
 
         (ListElement(items, tight), index + 1)
     }
 }
 
 object ListItemGenerator extends Generator {
-    def generate(text: String): Option[GenerateResult] = {
+    protected def generate(text: String): Option[GenerateResult] = {
         val scanner = Scanner(text)
         var indent = 0
 

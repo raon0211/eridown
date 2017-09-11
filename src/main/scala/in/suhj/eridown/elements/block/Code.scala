@@ -13,7 +13,31 @@ case class Code(content: String, language: String) extends Element {
     }
 }
 
-object CodeFencedGenerator extends Generator {
+case class CodeFence(fence: String, language: String) extends Element {
+    def render = fence
+
+    override def integrate(targets: List[Element]): IntegrateResult = {
+        val content = new ListBuffer[String]
+
+        var canIntegrate = true
+        var index = 0
+
+        while (canIntegrate && index < targets.length) {
+            val target = targets(index)
+
+            target match {
+                case CodeFence(text, "") => canIntegrate = false
+                case item => content += item.rawText
+            }
+
+            index += 1
+        }
+
+        (Code(content.mkString("\n"), language), index + 1)
+    }
+}
+
+object CodeFenceGenerator extends Generator {
     def generate(text: String): Option[GenerateResult] = {
         val scanner = Scanner(text)
 
@@ -23,7 +47,7 @@ object CodeFencedGenerator extends Generator {
             indent += 1
         }
 
-        val opening =
+        val fence =
             if (scanner.reads("```")) {
                 scanner.mark()
                 scanner.skip(3)
@@ -40,31 +64,13 @@ object CodeFencedGenerator extends Generator {
                 scanner.extract
             } else ""
 
-        if (opening.isEmpty) return None
+        if (fence.isEmpty) return None
 
         scanner.mark()
         scanner.findAny(List(' ', '\n'))
         val lang = scanner.extract.trim
         scanner.skipToNextLine()
 
-        val content = new ListBuffer[String]
-
-        var codeContinued = true
-        while (codeContinued && !scanner.atEnd) {
-            var i = 0
-            while (i < indent && scanner.atWhitespace) {
-                scanner.skip(1)
-            }
-            val line = scanner.aheadLine
-            val closingFenceIndex = line.indexOf(opening)
-
-            if (closingFenceIndex >= 0 && line.substring(0, closingFenceIndex).trim.isEmpty) {
-                codeContinued = false
-            } else {
-                content += line
-            }
-            scanner.skipToNextLine()
-        }
-        Some((Code(content.mkString("\n"), lang), scanner.position))
+        Some(CodeFence(fence, lang), scanner.position)
     }
 }

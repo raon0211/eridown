@@ -267,4 +267,89 @@ class ListTest extends FunSuite {
         assert(Parser.render("- foo\n  - bar\n    - baz\n\n\n      bim")
             == "<ul><li>foo<ul><li>bar<ul><li><p>baz</p><p>bim</p></li></ul></li></ul></li></ul>")
     }
+
+    test("- foo\n- bar\n\n<!-- -->\n\n- baz\n- bim") {
+        assert(Parser.render("- foo\n- bar\n\n<!-- -->\n\n- baz\n- bim")
+            == "<ul><li>foo</li><li>bar</li></ul><!-- --><ul><li>baz</li><li>bim</li></ul>")
+    }
+
+    test("-   foo\n\n    notcode\n\n-   foo\n\n<!-- -->\n\n    code") {
+        assert(Parser.render("-   foo\n\n    notcode\n\n-   foo\n\n<!-- -->\n\n    code")
+            == "<ul><li><p>foo</p><p>notcode</p></li><li><p>foo</p></li></ul><!-- --><pre><code>code</code></pre>")
+    }
+
+    test("- a\n - b\n  - c\n   - d\n    - e\n   - f\n  - g\n - h\n- i") {
+        assert(Parser.render("- a\n - b\n  - c\n   - d\n    - e\n   - f\n  - g\n - h\n- i")
+            == "<ul><li>a</li><li>b</li><li>c</li><li>d</li><li>e</li><li>f</li><li>g</li><li>h</li><li>i</li></ul>")
+    }
+
+    test("1. a\n\n  2. b\n\n    3. c") {
+        assert(Parser.render("1. a\n\n  2. b\n\n    3. c")
+            == "<ol><li><p>a</p></li><li><p>b</p></li><li><p>c</p></li></ol>")
+    }
+
+    test("- a\n- b\n\n- c") {
+        assert(Parser.render("- a\n- b\n\n- c")
+            == "<ul><li><p>a</p></li><li><p>b</p></li><li><p>c</p></li></ul>")
+    }
+
+    test("* a\n*\n\n* c") {
+        assert(Parser.render("* a\n*\n\n* c")
+            == "<ul><li><p>a</p></li><li></li><li><p>c</p></li></ul>")
+    }
+
+    test("- a\n- b\n\n  c\n- d") {
+        assert(Parser.render("- a\n- b\n\n  c\n- d")
+            == "<ul><li><p>a</p></li><li><p>b</p><p>c</p></li><li><p>d</p></li></ul>")
+    }
+
+    test("- a\n- b\n\n  [ref]: /url\n- d") {
+        assert(Parser.render("- a\n- b\n\n  [ref]: /url\n- d")
+            == "<ul><li><p>a</p></li><li><p>b</p></li><li><p>d</p></li></ul>")
+    }
+
+    test("- a\n- ```\n  b\n\n\n  ```\n- c") {
+        assert(Parser.render("- a\n- ```\n  b\n\n\n  ```\n- c")
+            == "<ul><li>a</li><li><pre><code>b\n\n</code></pre></li><li>c</li></ul>")
+    }
+
+    test("- a\n  - b\n\n    c\n- d") {
+        assert(Parser.render("- a\n  - b\n\n    c\n- d")
+            == "<ul><li>a<ul><li><p>b</p><p>c</p></li></ul></li><li>d</li></ul>")
+    }
+
+    test("* a\n  > b\n  >\n* c") {
+        assert(Parser.render("* a\n  > b\n  >\n* c")
+            == "<ul><li>a<blockquote><p>b</p></blockquote></li><li>c</li></ul>")
+    }
+
+    test("- a\n  > b\n  ```\n  c\n  ```\n- d") {
+        assert(Parser.render("- a\n  > b\n  ```\n  c\n  ```\n- d")
+            == "<ul><li>a<blockquote><p>b</p></blockquote><pre><code>c</code></pre></li><li>d</li></ul>")
+    }
+
+    test("- a") {
+        assert(Parser.render("- a")
+            == "<ul><li>a</li></ul>")
+    }
+
+    test("- a\n  - b") {
+        assert(Parser.render("- a\n  - b")
+            == "<ul><li>a<ul><li>b</li></ul></li></ul>")
+    }
+
+    test("1. ```\n   foo\n   ```\n\n   bar") {
+        assert(Parser.render("1. ```\n   foo\n   ```\n\n   bar")
+            == "<ol><li><pre><code>foo</code></pre><p>bar</p></li></ol>")
+    }
+
+    test("* foo\n  * bar\n\n  baz") {
+        assert(Parser.render("* foo\n  * bar\n\n  baz")
+            == "<ul><li><p>foo</p><ul><li>bar</li></ul><p>baz</p></li></ul>")
+    }
+
+    test("- a\n  - b\n  - c\n\n- d\n  - e\n  - f") {
+        assert(Parser.render("- a\n  - b\n  - c\n\n- d\n  - e\n  - f")
+            == "<ul><li><p>a</p><ul><li>b</li><li>c</li></ul></li><li><p>d</p><ul><li>e</li><li>f</li></ul></li></ul>")
+    }
 }

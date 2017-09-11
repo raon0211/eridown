@@ -16,12 +16,13 @@ abstract class Transformer {
     protected val fillGenerator: Generator
     protected def skipToNext(scanner: Scanner)
 
-    final def transform(text: String): String = {
+    final def transform(text: String): String = parse(text).map(_.render).mkString
+    final def parse(text: String): List[Element] = {
         def fill(text: String) = (fillGenerator.create(text): @unchecked) match {
             case Some(result) => result
         }
 
-        if (generators.isEmpty) return fill(text).render
+        if (generators.isEmpty) return List(fill(text))
 
         val elementRanges = new ListBuffer[ElementRange]
         val scanner = Scanner(text)
@@ -80,7 +81,7 @@ abstract class Transformer {
             elements.remove(0, consumedIndex)
         }
 
-        integrated.map(_.render).mkString
+        integrated.toList
     }
 }
 

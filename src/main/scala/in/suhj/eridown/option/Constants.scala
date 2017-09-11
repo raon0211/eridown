@@ -8,13 +8,14 @@ object Constants {
     val eridownBlocks: List[Generator] = List(
         CodeLineGenerator,
         ThematicBreakGenerator,
-        CodeFencedGenerator,
+        CodeFenceGenerator,
         HeadingGenerator,
         BlockquoteLineGenerator,
         ListItemGenerator,
         TableGenerator,
         DefinitionListGenerator,
-        NoFormatGenerator
+        NoFormatGenerator,
+        HtmlCommentBlockGenerator
     )
     val eridownInlines: List[Generator] = List(
         BoldGenerator,
